@@ -17,7 +17,8 @@ Before publication, the candidate must have:
 - explicit review of any opaque domain-state bytes before a capsule is made
   public (the built-in acknowledgment alone is not a review);
 - a secret scan and diff-whitespace check;
-- two identical sdist/wheel builds under one `SOURCE_DATE_EPOCH`;
+- two local builds whose expected sdist and wheel artifacts are byte-identical
+  after the declared sdist timestamp normalization under one `SOURCE_DATE_EPOCH`;
 - a draft, unmerged pull request describing the claim ceiling.
 
 After the implementation commit is clean, create the local reproducibility
@@ -28,8 +29,19 @@ python scripts/verify_reproducible_build.py --receipt docs/receipts/v0.2.0-build
 ```
 
 The script builds twice beneath `build/reproducibility`, refuses a dirty tree,
-compares every artifact hash, and records the source commit/tree and
-`SOURCE_DATE_EPOCH`. It does not tag, upload, or publish anything.
+requires the exact expected sdist and wheel, normalizes accepted
+source-distribution tar-member timestamps to `SOURCE_DATE_EPOCH`, and
+canonicalizes the gzip stream by setting its timestamp and removing its
+original-filename header,
+compares every post-normalization artifact hash, rechecks that source identity
+stayed unchanged, and records the source commit/tree and epoch. It accepts only
+one safe distribution root containing regular files and directories, portable
+noncolliding paths, ordinary permission bits, canonical empty ownership names
+and zero IDs, no links, and no non-temporal PAX metadata.
+Paths, modes, payloads, and other accepted member metadata are preserved. The
+receipt's claim is deliberately limited to two local builds after this declared
+normalization; it is not a general cross-host reproducibility claim. The script
+does not tag, upload, or publish anything.
 
 ## Publication boundary
 

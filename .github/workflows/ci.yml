@@ -43,7 +43,7 @@ jobs:
           --authorize-local-demo
           --lab-root playground/ci-reference-lab
           --capsule-root playground/ci-reference-capsule
-      - name: Reproducible sdist and wheel
+      - name: Local two-build artifact identity
         if: runner.os == 'Linux'
         run: >-
           python scripts/verify_reproducible_build.py

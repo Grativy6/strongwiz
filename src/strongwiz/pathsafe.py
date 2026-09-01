@@ -25,11 +25,12 @@ def is_link_like(path: Path) -> bool:
 def is_portable_component(value: str, *, max_length: int = 255) -> bool:
     """Check one non-reserved component accepted on both Windows and POSIX."""
 
+    forbidden = frozenset('<>:"/\\|?*')
     return (
         bool(value)
         and value not in {".", ".."}
         and len(value) <= max_length
         and not value.endswith((" ", "."))
-        and all(character not in value for character in ("\x00", "/", "\\", ":"))
+        and all(ord(character) >= 32 and character not in forbidden for character in value)
         and not PureWindowsPath(value).is_reserved()
     )

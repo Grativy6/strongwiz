@@ -1,4 +1,4 @@
-"""Build Strongwiz twice and emit a canonical reproducibility receipt.
+"""Build Strongwiz twice and emit a canonical local artifact-identity receipt.
 
 The script refuses a dirty tree and keeps every generated path beneath the
 repository.  It prepares release evidence; it does not create a tag, upload an
@@ -8,13 +8,16 @@ artifact, publish a release, or change legal terms.
 from __future__ import annotations
 
 import argparse
+import copy
+import gzip
 import hashlib
 import os
 import re
 import secrets
 import subprocess
 import sys
-from pathlib import Path
+import tarfile
+from pathlib import Path, PurePosixPath
 
 from strongwiz import __version__
 from strongwiz.canonical import canonical_bytes
@@ -59,6 +62,115 @@ def _artifact_hashes(directory: Path) -> dict[str, str]:
     return {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in files}
 
 
+def _validated_sdist_members(
+    source: tarfile.TarFile,
+    expected_root: str,
+) -> tuple[tarfile.TarInfo, ...]:
+    """Accept only the narrow regular-file/directory sdist surface we can preserve."""
+
+    if source.pax_headers:
+        raise ValueError("sdist has unsupported global PAX metadata")
+    members = tuple(source.getmembers())
+    seen: set[str] = set()
+    seen_casefolded: set[str] = set()
+    root_count = 0
+    for member in members:
+        name = member.name
+        parts = name.split("/")
+        portable = PurePosixPath(name)
+        if (
+            not name
+            or "\\" in name
+            or portable.is_absolute()
+            or any(part in {"", ".", ".."} for part in parts)
+            or any(not is_portable_component(part) for part in parts)
+            or portable.as_posix() != name
+            or parts[0] != expected_root
+        ):
+            raise ValueError(f"sdist member has an unsafe or unexpected path: {name!r}")
+        if name in seen:
+            raise ValueError(f"sdist contains a duplicate member path: {name!r}")
+        seen.add(name)
+        folded_name = name.casefold()
+        if folded_name in seen_casefolded:
+            raise ValueError(f"sdist contains a case-folding path collision: {name!r}")
+        seen_casefolded.add(folded_name)
+        if name == expected_root:
+            root_count += 1
+            if not member.isdir():
+                raise ValueError("sdist top-level root must be a directory")
+        elif not (member.isfile() or member.isdir()):
+            raise ValueError(f"sdist member type is not supported: {name!r}")
+        if member.mode & ~0o777:
+            raise ValueError(f"sdist member has unsupported mode bits: {name!r}")
+        if (
+            member.uid != 0
+            or member.gid != 0
+            or member.uname
+            or member.gname
+            or member.linkname
+        ):
+            raise ValueError(
+                f"sdist member has unsupported ownership or link metadata: {name!r}"
+            )
+        if set(member.pax_headers) - {"mtime"}:
+            raise ValueError(f"sdist member has unsupported PAX metadata: {name!r}")
+    if root_count != 1:
+        raise ValueError("sdist must contain exactly one declared top-level root directory")
+    file_paths = {member.name.casefold() for member in members if member.isfile()}
+    for member in members:
+        parts = member.name.split("/")
+        for boundary in range(1, len(parts)):
+            ancestor = "/".join(parts[:boundary]).casefold()
+            if ancestor in file_paths:
+                raise ValueError(
+                    f"sdist regular file is an ancestor of another member: {member.name!r}"
+                )
+    return members
+
+
+def _normalize_sdist(path: Path, source_date_epoch: int) -> None:
+    """Normalize only accepted sdist member and gzip timestamps."""
+
+    temporary = path.with_name(f".{path.name}.normalized")
+    if temporary.exists() or is_link_like(temporary):
+        raise FileExistsError(f"sdist normalization path already exists: {temporary}")
+    expected_root = path.name.removesuffix(".tar.gz")
+    try:
+        with tarfile.open(path, "r:gz") as source:
+            members = _validated_sdist_members(source, expected_root)
+            with temporary.open("xb") as raw_output:
+                with (
+                    gzip.GzipFile(
+                        filename="",
+                        mode="wb",
+                        fileobj=raw_output,
+                        mtime=source_date_epoch,
+                    ) as compressed,
+                    tarfile.open(
+                        fileobj=compressed,
+                        mode="w",
+                        format=tarfile.PAX_FORMAT,
+                    ) as target,
+                ):
+                    for member in members:
+                        normalized = copy.copy(member)
+                        normalized.mtime = source_date_epoch
+                        normalized.pax_headers = {
+                            key: value
+                            for key, value in member.pax_headers.items()
+                            if key != "mtime"
+                        }
+                        payload = source.extractfile(member) if member.isfile() else None
+                        target.addfile(normalized, payload)
+                raw_output.flush()
+                os.fsync(raw_output.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
 def _safe_run_id(value: str) -> str:
     """Require one bounded component that is portable across Windows and POSIX."""
 
@@ -92,6 +204,13 @@ def _build(root: Path, output: Path, source_date_epoch: int) -> dict[str, str]:
         env=environment,
         check=True,
     )
+    expected_sdist = output / f"strongwiz-{__version__}.tar.gz"
+    expected_wheel = output / f"strongwiz-{__version__}-py3-none-any.whl"
+    produced = {path.name for path in output.iterdir() if path.is_file()}
+    expected = {expected_sdist.name, expected_wheel.name}
+    if produced != expected:
+        raise RuntimeError("the build must produce exactly the expected sdist and wheel")
+    _normalize_sdist(expected_sdist, source_date_epoch)
     return _artifact_hashes(output)
 
 
@@ -125,7 +244,7 @@ def main(argv: list[str] | None = None) -> int:
     first = _build(root, build_root / "first", epoch)
     second = _build(root, build_root / "second", epoch)
     if first != second:
-        raise RuntimeError("release artifacts differ across identical clean-tree builds")
+        raise RuntimeError("post-normalization artifacts differ across the two local builds")
     if (
         _git(root, "status", "--porcelain")
         or _git(root, "rev-parse", "HEAD") != source_commit
@@ -138,10 +257,20 @@ def main(argv: list[str] | None = None) -> int:
     payload = {
         "artifact_sha256": first,
         "build_count": 2,
+        "claim_scope": "local-two-build-post-normalization-identity",
         "package_version": __version__,
+        "post_normalization_artifacts_identical": True,
         "publication_performed": False,
-        "reproducible": True,
-        "schema": "strongwiz.reproducible-build.v1",
+        "schema": "strongwiz.reproducible-build.v2",
+        "sdist_normalization": {
+            "accepted_member_types": ["directory", "regular-file"],
+            "gzip_header_filename": "removed",
+            "gzip_header_mtime": "SOURCE_DATE_EPOCH",
+            "gzip_stream": "recompressed-with-python-gzip",
+            "other_member_metadata": "preserved",
+            "pax_member_mtime": "removed",
+            "tar_member_mtime": "SOURCE_DATE_EPOCH",
+        },
         "source_commit": source_commit,
         "source_date_epoch": epoch,
         "source_tree": source_tree,
