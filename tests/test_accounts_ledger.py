@@ -245,3 +245,35 @@ def test_readonly_verification_requires_existing_ledger_and_external_seal(
         )
         with pytest.raises(LedgerError, match="external seal"):
             ledger.verify(expected_count=2, expected_head=receipt.receipt_hash)
+
+
+def test_readonly_verification_does_not_mutate_the_ledger_directory(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "sealed.sqlite3"
+    with SQLiteLedger(path) as ledger:
+        ledger.append(
+            occurrence_id="sealed-0",
+            kind="sealed",
+            account_id="account",
+            account_version=0,
+            payload={"sealed": True},
+        )
+    before = {item.name: item.read_bytes() for item in tmp_path.iterdir() if item.is_file()}
+    with SQLiteLedger(path, readonly=True) as ledger:
+        assert ledger.verify()[0] == 1
+    after = {item.name: item.read_bytes() for item in tmp_path.iterdir() if item.is_file()}
+    assert after == before
+
+
+def test_readonly_verification_refuses_uncheckpointed_sqlite_state(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "sealed.sqlite3"
+    with SQLiteLedger(path):
+        pass
+    transient = Path(f"{path}-wal")
+    transient.write_bytes(b"uncheckpointed")
+    with pytest.raises(LedgerError, match="closed, checkpointed"):
+        SQLiteLedger(path, readonly=True)
+    assert transient.read_bytes() == b"uncheckpointed"

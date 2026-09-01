@@ -25,6 +25,27 @@ source repository's copyright or license.
 Commit identifiers are the evidence boundary. Later changes in those
 repositories do not silently alter this notice.
 
+## Owner-supplied formal source stack
+
+The following works by Christopher D. Pang were inspected as conceptual design
+sources. Their exact local artifact hashes and persistent identifiers are in
+[`docs/source-identities.json`](docs/source-identities.json). No paper text,
+figures, or equations are redistributed by Strongwiz, and a shared
+author/steward does not make these independent corroborations.
+
+| Work | Persistent identity | Bounded use |
+| --- | --- | --- |
+| Golden Phase Prime Ribbons v0.1 | [Zenodo 22225414](https://doi.org/10.5281/zenodo.22225414) | Optional geometry-aware path experiment, disabled by default. |
+| A0 Software Boundary-Layer Kernel v0.10.0 | [Zenodo 22168887](https://doi.org/10.5281/zenodo.22168887) | Accounts, guards, residuals, proposal/control separation, and reopening. |
+| The Context Sets a Rhythm v0.1 | [Zenodo 22214952](https://doi.org/10.5281/zenodo.22214952) | Replaceable cadence and refresh policy design. |
+| The Context Draws a Map v1.0 | [Zenodo 21831000](https://doi.org/10.5281/zenodo.21831000) | Local context maps, route distinctions, and reopening handles. |
+| The Context Is the Model | [Zenodo 21713134](https://doi.org/10.5281/zenodo.21713134) | Context identity and model/runtime/work separation. |
+| PAL Single-Cut Transport Lemma v0.1 | [Zenodo 21882601](https://doi.org/10.5281/zenodo.21882601) | Exact boundary transport accounting. |
+
+PEA Core v1.1.3, PECAN v1.0.4, and SEED v0.3 are separately identified
+control-policy inputs. Their software profiles remain non-authorizing and are
+not represented as legal, ethical, or institutional authority.
+
 ## Research context, not imported code
 
 Strongwiz's treatment of feedback and retained continuation was informed by:

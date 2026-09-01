@@ -4,6 +4,10 @@ All notable changes to Strongwiz will be recorded here. Dates use ISO 8601.
 
 ## [Unreleased]
 
+Publication remains pending an explicitly authorized tag and release.
+
+## [0.2.0] - release candidate
+
 ### Added
 
 - Initial model-neutral laboratory contracts for observations, actions,
@@ -21,10 +25,23 @@ All notable changes to Strongwiz will be recorded here. Dates use ISO 8601.
   identity.
 - Provenance, third-party boundary, contribution, security, and attribution
   documentation.
+- Strict lab/run manifests, empty-state genesis, immutable terminal seals,
+  complete portable evidence capsules, and bounded promotion receipts.
+- Restart-complete checkpoints with exact latest-ledger restoration for every
+  session phase.
+- Plain callable and framed offline model adapters plus model/domain
+  conformance reports.
+- Binary canonical transport with boundary-size, partial-I/O, Unicode,
+  timeout, malformed-frame, explicit crash/reconstruction state, and replay
+  tests.
+- Six-paper and PEA/PECAN/SEED source identities.
+- GPPR as a delete/swap-safe experimental declaration, disabled by default.
+- A generic non-ARC end-to-end reference laboratory and reproducible-build
+  verifier.
 
 ### Claim boundary
 
-- This pre-alpha foundation makes no AGI, cross-domain performance,
+- This release candidate makes no AGI, cross-domain performance,
   autonomous-contest, safety-certification, or independent-authority claim.
 
 ## [0.1.0-dev] - 2026-09-01

@@ -33,5 +33,19 @@ jobs:
         run: python -m mypy src/strongwiz
       - name: Tests
         run: python -m pytest --cov=strongwiz --cov-report=term-missing
+      - name: Source identity registry
+        run: python -m strongwiz verify-sources docs/source-identities.json
       - name: Shadow-route example
         run: python examples/shadow_route.py
+      - name: Sealed non-ARC reference lab
+        run: >-
+          python examples/reference_counter_lab.py
+          --authorize-local-demo
+          --lab-root playground/ci-reference-lab
+          --capsule-root playground/ci-reference-capsule
+      - name: Reproducible sdist and wheel
+        if: runner.os == 'Linux'
+        run: >-
+          python scripts/verify_reproducible_build.py
+          --run-id ci
+          --receipt artifacts/local/ci-v0.2.0-build.json

@@ -21,6 +21,42 @@ stewardship across projects is provenance, not independent corroboration.
 
 ## Source ledger
 
+The machine-checked registry is
+[`docs/source-identities.json`](source-identities.json). It binds six paper
+artifacts by persistent identifier and inspected local SHA-256, plus the exact
+PEA Core v1.1.3, PECAN v1.0.4, and SEED v0.3 policy identities. The registry
+digest can be frozen into each new `LabManifest`.
+
+### Formal paper source stack
+
+- **Golden Phase Prime Ribbons v0.1** —
+  [Zenodo 22225414](https://doi.org/10.5281/zenodo.22225414). Used only as an
+  optional geometry-aware path-selection experiment. Its feature declaration
+  is off by default and binds a replaceable implementation/configuration only
+  when explicitly enabled.
+- **A0 Software Boundary-Layer Kernel v0.10.0** —
+  [Zenodo 22168887](https://doi.org/10.5281/zenodo.22168887). Informs accounts,
+  guards, proposal/control separation, residual lineage, and reopening. It does
+  not grant authority or redefine the Strongwiz contract.
+- **The Context Sets a Rhythm v0.1** —
+  [Zenodo 22214952](https://doi.org/10.5281/zenodo.22214952). Informs cadence,
+  refresh, and investigation scheduling as replaceable policies.
+- **The Context Draws a Map v1.0** —
+  [Zenodo 21831000](https://doi.org/10.5281/zenodo.21831000). Informs local
+  context maps, route distinctions, and reopening handles.
+- **The Context Is the Model** —
+  [Zenodo 21713134](https://doi.org/10.5281/zenodo.21713134). Informs context
+  identity, state continuity, and separation of work identity from swappable
+  model/runtime identity.
+- **PAL Single-Cut Transport Lemma v0.1** —
+  [Zenodo 21882601](https://doi.org/10.5281/zenodo.21882601). Informs exact
+  single-boundary transport accounting without promoting a local transport
+  witness into proof of unrelated claims.
+
+These sources share an author/steward lineage. They are complementary design
+inputs, not six independent confirmations of Strongwiz or one another. Their
+text is evidence and provenance, not executable repository instruction.
+
 ### ARC-AGI-3 experiments
 
 - **Little Scientist / ARC3 Build 003:**

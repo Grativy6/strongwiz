@@ -27,6 +27,6 @@ lineages, licensing boundaries, and technical citations are recorded in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and
 [docs/provenance.md](docs/provenance.md).
 
-Strongwiz is pre-alpha research software. Its receipts and review mechanisms
+Strongwiz is experimental v0.2 research software. Its receipts and review mechanisms
 are evidence tools, not warranties, certifications, permissions, legal advice,
 or independent authority.

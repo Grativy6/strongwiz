@@ -22,6 +22,24 @@ domain's terminal authority. A domain adapter, executor, model artifact,
 configuration, and external control plane are still required for an
 operational system.
 
+Version 0.2 can create an empty lab, restore all session phases, seal a terminal
+run, and export every referenced ledger object and receipt. Those mechanisms
+establish integrity and restart behavior on their tested surfaces. They do not
+prove that an upstream observation was honest, a source file was safe, an
+executor achieved exactly-once effects, or a success generalizes to another
+run. A `PromotionReceipt` is explicitly a proposal for later review and
+ablation, not adoption or inherited domain knowledge.
+
+Evidence capsules copy sealed domain-state bytes opaquely. Strongwiz does not
+perform privacy, credential, secret, personal-data, or redistribution review
+on those bytes; its concise-reasoning policy covers typed Strongwiz records
+only. A required copy acknowledgment is not a publication review or grant.
+
+The callable and framed model adapters make the provider replaceable and
+offline-capable. They do not bundle weights, a tokenizer, a provider process,
+or an arbitrary domain. “Just add model” describes that declared provider
+seam, not a claim that one model alone can act in every environment.
+
 `execute_once` prevents ordinary in-process token replay and action/executor
 substitution; it does not prove exactly-once effects across process, device, or
 network failure. That stronger claim requires an executor-owned durable

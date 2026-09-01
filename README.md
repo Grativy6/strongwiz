@@ -10,15 +10,15 @@ identity of the work.
 The project is general-purpose. ARC-AGI-3 is one development adapter and source
 of hard-won machinery; it is not the kernel's definition.
 
-> Status: `0.1.0.dev0`, pre-alpha. The typed kernel and deterministic fixtures are
-> runnable. This is not yet an autonomous product, an ARC Prize submission, or
-> evidence of general intelligence.
+> Status: `0.2.0`, public-release candidate. The typed kernel, lab-genesis
+> commands, local model adapters, resumable sessions, and sealed evidence
+> capsules are runnable. No `v0.2.0` tag or release has been published yet.
+> This is not an ARC Prize submission or evidence of general intelligence.
 
 ## The declared boundary
 
-The public contract candidate is `strongwiz.contract.v1`. Strongwiz is still
-pre-alpha, so compatibility is exercised and versioned rather than promised
-across every future `0.x` release:
+The public contract candidate is `strongwiz.contract.v1`. Compatibility is
+exercised and versioned rather than promised across every future `0.x` release:
 
 | Boundary | What crosses it | What does not |
 | --- | --- | --- |
@@ -78,8 +78,49 @@ requires the exact completed execution evidence.
   permit, then returns an opaque coordinator-issued result;
 - frozen runtime manifests binding code, configuration, dependencies, drivers,
   adapters, policies, and model artifacts;
+- restart-complete checkpoints for every session phase without repeating a
+  model call or environment action;
+- zero-state `LabManifest`/`RunSpec` genesis with an empty ledger and no prior
+  domain state;
+- immutable terminal run seals and complete portable evidence capsules that
+  carry every ledger object, receipt, and sealed domain-state entry;
+- in-process callable-model and bounded binary framed-model adapters, with no
+  newline-delimited terminal protocol;
+- structural model/domain conformance reports that grant no execution
+  authority;
+- explicit, replaceable experimental features, with GPPR disabled by default;
+- an exact six-paper and PEA/PECAN/SEED source-identity registry;
 - a deliberately narrow ARC-AGI-3 terminal-authority adapter with no game IDs,
   policies, or action scripts.
+
+## Just add a model
+
+For a local Python model, return one or more `ProposalDraft` values from an
+ordinary callback and wrap it with `CallableModelDriver`. Strongwiz adds the
+exact driver, observation, scope, and goal bindings itself:
+
+```python
+from strongwiz.modelkit import CallableModelDriver
+
+driver = CallableModelDriver(
+    driver_id="my-local-model",
+    driver_version="1",
+    driver_artifact_ref="<sha256-of-model-and-configuration>",
+    proposal_function=my_proposal_function,
+)
+```
+
+`FramedModelDriver` provides the same boundary for an offline model process
+over canonical, length-prefixed binary JSON with checksums, bounds, timeouts,
+partial-I/O handling, and replay guards. Its explicit
+`FramedModelRestartState` reserves request identities before I/O and can be
+persisted by the caller across a process crash. It does not use a TTY or newline
+protocol, and it does not claim to supervise or restart the provider process.
+
+“Just add model” applies to the reasoning-provider boundary. Consequential
+work still needs a domain adapter, a single-writer executor, and an externally
+supplied grant; Strongwiz deliberately does not invent those authorities. See
+[Just-add-model guide](docs/just-add-model.md).
 
 ## Install and verify
 
@@ -102,10 +143,31 @@ Print the model-driver request schema or audit an existing ledger:
 strongwiz schema
 strongwiz schema --all
 strongwiz verify-ledger path/to/run.sqlite3
+strongwiz verify-sources docs/source-identities.json
 ```
 
+Create and verify a genuinely empty laboratory from predeclared manifests,
+then seal and package its evidence after a run:
+
+```console
+strongwiz lab init playground/my-lab --manifest lab-input.json --run-spec run-input.json
+strongwiz lab verify playground/my-lab --require-genesis
+strongwiz lab seal-run playground/my-lab --disposition partial --terminal-state STOPPED --terminal-evidence-ref <sha256> --summary "bounded run stopped"
+strongwiz lab pack-evidence playground/my-lab artifacts/local/my-capsule --acknowledge-opaque-domain-state
+strongwiz lab verify-capsule artifacts/local/my-capsule
+```
+
+The opaque-domain flag acknowledges only the requested local copy. Strongwiz
+does not inspect domain-state bytes for credentials, private reasoning,
+personal data, or redistribution rights; review them independently before any
+commit, upload, or publication.
+
 Run [`examples/shadow_route.py`](examples/shadow_route.py) for a complete
-nonexecuting route through the declared proposal/control boundary.
+nonexecuting route through the declared proposal/control boundary. Run
+[`examples/reference_counter_lab.py`](examples/reference_counter_lab.py) for a
+generic non-ARC lab that starts from genesis, uses a local model, crosses the
+exact grant/single-writer boundary, observes domain success, resumes from a
+complete checkpoint surface, and packs a verified evidence capsule.
 The audited foundation commands, results, reproducible-wheel hash, and claim
 ceiling are recorded in
 [`docs/foundation-verification.md`](docs/foundation-verification.md).
@@ -131,9 +193,12 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Architecture](docs/architecture.md)
 - [Reasoning loop](docs/reasoning-loop.md)
 - [Adapters and packaging](docs/adapters.md)
+- [Lab genesis and sealed runs](docs/lab-genesis.md)
+- [Just-add-model guide](docs/just-add-model.md)
 - [Retention ablations](docs/retention-ablation.md)
 - [Claim boundary](docs/claim-boundary.md)
 - [Provenance](docs/provenance.md)
+- [v0.2 release gate](docs/release-v0.2.md)
 - [Foundation verification receipt](docs/foundation-verification.md)
 
 ## Stewardship, provenance, and license

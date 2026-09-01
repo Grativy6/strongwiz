@@ -16,6 +16,28 @@ class LedgerError(RuntimeError):
     pass
 
 
+_SQLITE_TRANSIENT_SUFFIXES = ("-journal", "-shm", "-wal")
+
+
+def _require_quiescent_ledger(path: Path) -> str:
+    """Return a non-mutating SQLite URI only for a closed, checkpointed ledger."""
+
+    if not path.is_file():
+        raise LedgerError("ledger does not exist as a regular file")
+    transient = tuple(
+        Path(f"{path}{suffix}")
+        for suffix in _SQLITE_TRANSIENT_SUFFIXES
+        if Path(f"{path}{suffix}").exists()
+    )
+    if transient:
+        names = ", ".join(item.name for item in transient)
+        raise LedgerError(
+            "read-only verification requires a closed, checkpointed ledger; "
+            f"found transient SQLite state: {names}"
+        )
+    return f"{path.resolve().as_uri()}?mode=ro&immutable=1"
+
+
 class ReceiptEnvelope(ContractModel):
     schema_id: str = Field(default="strongwiz.receipt.v1", alias="schema")
     receipt_id: str
@@ -67,9 +89,7 @@ class SQLiteLedger:
         self.path = Path(path)
         self._readonly = readonly
         if readonly:
-            if not self.path.is_file():
-                raise LedgerError("ledger does not exist as a regular file")
-            uri = f"{self.path.resolve().as_uri()}?mode=ro"
+            uri = _require_quiescent_ledger(self.path)
             self._connection = sqlite3.connect(uri, uri=True)
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
