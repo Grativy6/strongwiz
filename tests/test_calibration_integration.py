@@ -338,6 +338,19 @@ def test_local_control_protocol_is_length_prefixed_and_replay_guarded() -> None:
     assert decoded["kind"] == "status"
 
 
+def test_proposal_revision_fields_require_an_exact_structural_predecessor() -> None:
+    request_ref = content_hash("revision-field-request")
+    first = _proposal(request_ref, "ACTION1", suffix="first")
+    with pytest.raises(ValueError, match="first proposal attempt cannot supersede"):
+        first.model_copy(update={"supersedes_proposal_ref": content_hash("predecessor")})
+    with pytest.raises(ValueError, match="must bind its exact predecessor"):
+        first.model_copy(update={"proposal_attempt": 2})
+    with pytest.raises(ValueError, match="lowercase SHA-256"):
+        first.model_copy(
+            update={"proposal_attempt": 2, "supersedes_proposal_ref": "not-a-digest"}
+        )
+
+
 class _StatusHarness:
     def __init__(self) -> None:
         self.bundle = SimpleNamespace(run_id="loopback-fixture")
@@ -511,6 +524,160 @@ def test_game_over_assessment_retains_failure_then_reset_continues(
     assert receipt.terminal_record.final_state == "NOT_FINISHED"
     assert receipt.terminal_record.budget.resets == 2
     assert receipt.terminal_record.budget.non_reset_actions == 1
+
+
+def test_held_route_requires_exact_revision_lineage_before_one_admission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assets = tmp_path / "revision-assets"
+    assets.mkdir()
+    _write_fixture_asset(assets)
+    run_root = tmp_path / "revision-run"
+    prepare_run(
+        repository_root=REPOSITORY_ROOT,
+        run_root=run_root,
+        assets_root=assets,
+        run_id="fixture-held-proposal-revision",
+    )
+    port = _Port(
+        _raw_frame(GameState.NOT_FINISHED, pixel=1),
+        [
+            _raw_frame(
+                GameState.NOT_FINISHED,
+                action=GameAction.ACTION1,
+                pixel=2,
+            )
+        ],
+    )
+    monkeypatch.setattr(OfficialLocalArcPort, "open", lambda **_kwargs: port)
+    harness = CalibrationHarness(
+        repository_root=REPOSITORY_ROOT,
+        run_root=run_root,
+        assets_root=assets,
+    )
+    request_ref = str(harness.status()["request_ref"])
+    held_draft = _proposal(request_ref, "ACTION1", suffix="held").model_copy(
+        update={"reversible": False}
+    )
+    calls_before_hold = harness.budget.total_environment_calls
+    server = CalibrationControlServer(harness)
+    held_response = server.dispatch(
+        {
+            "kind": "act",
+            "payload": held_draft.model_dump(mode="json", by_alias=True),
+        }
+    )
+    assert held_response["ok"] is True
+    held = held_response["payload"]
+    assert isinstance(held, dict)
+    assert held["action_admitted"] is False
+    assert held["assessment_required"] is False
+    assert held["effect"] == "NONE"
+    assert held["environment_effect_started"] is False
+    assert held["expected_next"] == "proposal_draft"
+    assert held["next_proposal_attempt"] == 2
+    assert held["route_disposition"] == "hold"
+    assert held["supersedes_proposal_draft_ref"] == held_draft.digest
+    assert held["supersedes_proposal_ref"] == held["proposal_ref"]
+    assert held["terminal"] is False
+    revision = held["revision"]
+    assert isinstance(revision, dict)
+    assert revision == {
+        "proposal_attempt": 2,
+        "supersedes_proposal_draft_ref": held_draft.digest,
+        "supersedes_proposal_ref": held["proposal_ref"],
+    }
+    assert port.calls == []
+    assert harness.budget.total_environment_calls == calls_before_hold
+    held_status = harness.status()
+    assert held_status["expected_next"] == "proposal_draft"
+    assert held_status["request_ref"] == request_ref
+    assert held_status["proposal_revision"] == {
+        "proposal_attempt": 2,
+        "supersedes_proposal_ref": held["proposal_ref"],
+    }
+    assert harness.ledger.has_object(held_draft.digest)
+    assert harness.ledger.has_object(str(held["proposal_ref"]))
+    assert harness.ledger.has_object(str(held["route_ref"]))
+
+    with pytest.raises(CalibrationError, match="exactly 2"):
+        harness.act(
+            _proposal(request_ref, "ACTION1", suffix="skipped").model_copy(
+                update={
+                    "proposal_attempt": 3,
+                    "supersedes_proposal_ref": held["proposal_ref"],
+                }
+            )
+        )
+    with pytest.raises(CalibrationError, match="exactly 2"):
+        harness.act(held_draft)
+    with pytest.raises(CalibrationError, match="exact held predecessor"):
+        harness.act(
+            _proposal(request_ref, "ACTION1", suffix="wrong-parent").model_copy(
+                update={
+                    "proposal_attempt": 2,
+                    "supersedes_proposal_ref": content_hash("wrong-parent"),
+                }
+            )
+        )
+    assert port.calls == []
+
+    revised_draft = _proposal(request_ref, "ACTION1", suffix="revised").model_copy(
+        update={
+            "proposal_attempt": revision["proposal_attempt"],
+            "supersedes_proposal_ref": revision["supersedes_proposal_ref"],
+        }
+    )
+    admitted = harness.act(revised_draft)
+    assert admitted["assessment_required"] is True
+    assert len(port.calls) == 1
+    assert port.calls[0] == (GameAction.ACTION1, {})
+    assert harness.budget.total_environment_calls == calls_before_hold + 1
+    active_request = harness._request
+    assert active_request is not None
+    with pytest.raises(
+        CalibrationError, match="admitted proposal cannot be replaced or replayed"
+    ):
+        harness.bridge.supply(
+            active_request,
+            revised_draft,
+            available_evidence_refs=active_request.retained_fact_refs,
+        )
+    stale_replacement = _proposal(request_ref, "ACTION1", suffix="stale").model_copy(
+        update={
+            "proposal_attempt": 3,
+            "supersedes_proposal_ref": admitted["proposal_ref"],
+        }
+    )
+    with pytest.raises(
+        CalibrationError, match="admitted proposal cannot be replaced or replayed"
+    ):
+        harness.bridge.supply(
+            active_request,
+            stale_replacement,
+            available_evidence_refs=active_request.retained_fact_refs,
+        )
+    with pytest.raises(CalibrationError, match="previous action requires assessment"):
+        harness.act(revised_draft)
+    assert len(port.calls) == 1
+    harness.assess(_assessment(str(admitted["proposal_ref"]), suffix="revised"))
+    next_status = harness.status()
+    next_request_ref = str(next_status["request_ref"])
+    assert next_request_ref != request_ref
+    assert next_status["proposal_revision"] == {
+        "proposal_attempt": 1,
+        "supersedes_proposal_ref": None,
+    }
+    next_held = harness.act(
+        _proposal(next_request_ref, "ACTION1", suffix="new-request").model_copy(
+            update={"reversible": False}
+        )
+    )
+    assert next_held["proposal_attempt"] == 1
+    assert next_held["revision"]["proposal_attempt"] == 2  # type: ignore[index]
+    assert len(port.calls) == 1
+    assert harness.budget.total_environment_calls == calls_before_hold + 1
+    harness.close()
 
 
 def test_initial_reset_failure_is_durable_nonretryable_and_sealable(

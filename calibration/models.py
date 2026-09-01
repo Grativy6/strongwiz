@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -21,6 +22,7 @@ from strongwiz.integrity import FrozenRuntimeManifest, sha256_file
 PREREGISTRATION_SCHEMA = "strongwiz.arc-agi3-calibration-preregistration.v1"
 ASSET_MANIFEST_SCHEMA = "strongwiz.arc-agi3-official-asset.v1"
 RUN_RECEIPT_SCHEMA = "strongwiz.arc-agi3-calibration-run-receipt.v1"
+_DIGEST = re.compile(r"^[0-9a-f]{64}$")
 
 
 class AccessPolicy(ContractModel):
@@ -175,6 +177,8 @@ class ProposalDraft(ContractModel):
     )
     message_id: str
     request_ref: str
+    proposal_attempt: PositiveInt = 1
+    supersedes_proposal_ref: str | None = None
     proposal_id: str
     action_name: str
     action_parameters: ImmutableJSONObject = Field(default_factory=dict)
@@ -225,6 +229,15 @@ class ProposalDraft(ContractModel):
             raise ValueError("proposal draft requires effects, predictions, and falsifiers")
         if DecisionEffect.OUTPUT in self.decision_effects:
             raise ValueError("environment proposals cannot request a release output effect")
+        if self.proposal_attempt == 1:
+            if self.supersedes_proposal_ref is not None:
+                raise ValueError("first proposal attempt cannot supersede another proposal")
+        elif self.supersedes_proposal_ref is None:
+            raise ValueError("revised proposal attempt must bind its exact predecessor")
+        if self.supersedes_proposal_ref is not None and not _DIGEST.fullmatch(
+            self.supersedes_proposal_ref
+        ):
+            raise ValueError("superseded proposal reference must be a lowercase SHA-256 digest")
         return self
 
 

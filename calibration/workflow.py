@@ -942,6 +942,13 @@ class CalibrationHarness:
             expected = "assessment_draft"
         else:
             expected = "proposal_draft"
+        revision: dict[str, object] | None = None
+        if self._request is not None and self._pending_execution is None:
+            attempt, predecessor = self.bridge.expected_revision(self._request)
+            revision = {
+                "proposal_attempt": attempt,
+                "supersedes_proposal_ref": predecessor,
+            }
         return {
             "budget": self.budget.receipt().model_dump(mode="json", by_alias=True),
             "completion_genuinely_observed": (
@@ -956,6 +963,7 @@ class CalibrationHarness:
             "phase": self.session.phase.value,
             "post_effect_persistence_failure": self._post_effect_persistence_failure,
             "proposal_ref": self._pending_proposal_ref,
+            "proposal_revision": revision,
             "raw_path": str(self.domain_root / frame.raw_relative_path),
             "request": None
             if self._request is None
@@ -967,7 +975,7 @@ class CalibrationHarness:
 
     def _record_control(
         self, kind: str, values: tuple[object, ...], payload: dict[str, object]
-    ) -> None:
+    ) -> str:
         refs: list[str] = []
         for value in values:
             if not hasattr(value, "model_dump"):
@@ -975,7 +983,7 @@ class CalibrationHarness:
             dumped = value.model_dump(mode="json", by_alias=True)
             refs.append(self.ledger.put_object(dumped))
         self._control_occurrence += 1
-        self.ledger.append(
+        envelope = self.ledger.append(
             occurrence_id=(
                 f"{self.bundle.run_id}:control:{self._control_occurrence:08d}:{kind}"
             ),
@@ -985,6 +993,7 @@ class CalibrationHarness:
             payload=payload,
             object_refs=tuple(dict.fromkeys(refs)),
         )
+        return envelope.receipt_id
 
     def _call_path(self, invocation_id: str, suffix: str) -> Path:
         return self.run_root / CALLS_RELATIVE / _call_filename(invocation_id, suffix)
@@ -1117,10 +1126,55 @@ class CalibrationHarness:
             credible_plan_supported=draft.credible_plan_supported,
             uncertainty_blocks_progress=draft.uncertainty_blocks_progress,
         )
-        if decision.route.disposition not in {RouteDisposition.ADMIT, RouteDisposition.REOPEN}:
-            raise CalibrationError(
-                f"Strongwiz route did not admit the proposal: {decision.route.disposition}"
+        if decision.selected_proposal_ref is None:
+            recovery_receipt_ref = self._record_control(
+                "proposal_revision_requested",
+                (draft, proposal, decision),
+                {
+                    "effect": decision.route.effect,
+                    "proposal_attempt": draft.proposal_attempt,
+                    "proposal_draft_ref": draft.digest,
+                    "proposal_ref": proposal.digest,
+                    "request_ref": request.digest,
+                    "route_ref": decision.route.digest,
+                },
             )
+            next_attempt, supersedes_proposal_ref = self.bridge.release_unexecuted_for_revision(
+                request,
+                proposal_ref=proposal.digest,
+                route=decision.route,
+            )
+            return {
+                "action_admitted": False,
+                "assessment_required": False,
+                "effect": decision.route.effect,
+                "environment_effect_started": False,
+                "expected_next": "proposal_draft",
+                "next_proposal_attempt": next_attempt,
+                "proposal_attempt": draft.proposal_attempt,
+                "proposal_draft_ref": draft.digest,
+                "proposal_ref": proposal.digest,
+                "recovery_receipt_ref": recovery_receipt_ref,
+                "request_ref": request.digest,
+                "revision": {
+                    "proposal_attempt": next_attempt,
+                    "supersedes_proposal_draft_ref": draft.digest,
+                    "supersedes_proposal_ref": supersedes_proposal_ref,
+                },
+                "route_disposition": decision.route.disposition.value,
+                "route_ref": decision.route.digest,
+                "state": self.current_state.value,
+                "supersedes_proposal_draft_ref": draft.digest,
+                "supersedes_proposal_ref": supersedes_proposal_ref,
+                "terminal": False,
+            }
+        if decision.route.disposition not in {RouteDisposition.ADMIT, RouteDisposition.REOPEN}:
+            raise CalibrationError("a selected proposal has a nonadmitting route")
+        self.bridge.mark_admitted(
+            request,
+            proposal_ref=proposal.digest,
+            route=decision.route,
+        )
         self._record_control(
             "action_preflight",
             (draft, context, pea, crossing, seed, lab_decision, control),

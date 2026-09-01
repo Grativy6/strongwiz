@@ -69,6 +69,13 @@ exact driver, observation, scope, goal, and cost bindings. An assessment input
 is a `strongwiz.arc-agi3-assessment-draft.v1`. Private chain-of-thought fields
 are rejected, and input files outside ignored `playground/` are refused.
 
+Proposal attempts are monotone within one observation. The first draft uses
+`proposal_attempt: 1` and no predecessor. If Strongwiz holds or otherwise does
+not select it, the response and subsequent `status` provide the exact next
+attempt number and `supersedes_proposal_ref`. A revision must bind both values;
+the held proposal remains in evidence. Attempts cannot be skipped or replayed,
+and an admitted proposal can never be replaced.
+
 After `GAME_OVER`, the next observation aperture contains only `RESET`. The
 failed assessment remains in the session ledger; an assessed reset can continue
 the same run. An infrastructure exception after an uncertain official call is

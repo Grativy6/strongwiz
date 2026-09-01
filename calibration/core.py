@@ -44,6 +44,8 @@ from strongwiz.contracts import (
     Outcome,
     Prediction,
     ReasoningRequest,
+    RouteDecision,
+    RouteDisposition,
 )
 from strongwiz.drivers import ExecutionCommand, ExecutorObservation, TerminalAuthority
 from strongwiz.integrity import sha256_file
@@ -637,7 +639,7 @@ def _reject_private_reasoning(value: object) -> None:
 
 class MemoizedProposalDraftBridge:
     driver_id = "external-context-isolated-codex-proposal-draft"
-    driver_version = "1.0.0"
+    driver_version = "1.1.0"
 
     def __init__(self) -> None:
         declaration = Path(__file__).with_name("model-interface.json")
@@ -652,6 +654,8 @@ class MemoizedProposalDraftBridge:
         )
         self._proposals: dict[str, CandidateProposal] = {}
         self._drafts: dict[str, ProposalDraft] = {}
+        self._attempt_history: dict[str, list[tuple[ProposalDraft, CandidateProposal]]] = {}
+        self._admitted_proposal_refs: dict[str, str] = {}
 
     def supply(
         self,
@@ -663,6 +667,23 @@ class MemoizedProposalDraftBridge:
         _reject_private_reasoning(draft.model_dump(mode="python", by_alias=True))
         if draft.request_ref != request.digest:
             raise CalibrationError("proposal draft does not bind the current request")
+        request_ref = request.digest
+        if request_ref in self._admitted_proposal_refs:
+            raise CalibrationError("an admitted proposal cannot be replaced or replayed")
+        prior_draft = self._drafts.get(request_ref)
+        if prior_draft is not None:
+            if prior_draft == draft:
+                return self._proposals[request_ref]
+            raise CalibrationError("an active proposal attempt cannot be replaced")
+        history = self._attempt_history.get(request_ref, [])
+        expected_attempt = len(history) + 1
+        expected_predecessor = None if not history else history[-1][1].digest
+        if draft.proposal_attempt != expected_attempt:
+            raise CalibrationError(
+                f"proposal attempt must be exactly {expected_attempt} for the current request"
+            )
+        if draft.supersedes_proposal_ref != expected_predecessor:
+            raise CalibrationError("proposal attempt does not bind the exact held predecessor")
         if draft.action_name not in request.observation.available_action_names:
             raise CalibrationError("proposal draft action is outside the observed aperture")
         if draft.action_name == "ACTION6":
@@ -729,12 +750,83 @@ class MemoizedProposalDraftBridge:
                 irreversible_actions=0 if draft.reversible else 1,
             ),
         )
-        prior = self._proposals.get(request.digest)
-        if prior is not None and prior != proposal:
-            raise CalibrationError("a request's memoized proposal cannot be replaced")
-        self._proposals[request.digest] = proposal
-        self._drafts[request.digest] = draft
+        if proposal.digest == draft.supersedes_proposal_ref:
+            raise CalibrationError("a revised proposal must differ from its held predecessor")
+        self._proposals[request_ref] = proposal
+        self._drafts[request_ref] = draft
+        self._attempt_history.setdefault(request_ref, []).append((draft, proposal))
         return proposal
+
+    def release_unexecuted_for_revision(
+        self,
+        request: ReasoningRequest,
+        *,
+        proposal_ref: str,
+        route: RouteDecision,
+    ) -> tuple[int, str]:
+        """Release only a nonselected attempt while retaining its exact lineage."""
+
+        request_ref = request.digest
+        if request_ref in self._admitted_proposal_refs:
+            raise CalibrationError("an admitted proposal cannot be released for revision")
+        try:
+            proposal = self._proposals[request_ref]
+            draft = self._drafts[request_ref]
+        except KeyError as error:
+            raise CalibrationError("no active proposal attempt can be revised") from error
+        if proposal.digest != proposal_ref:
+            raise CalibrationError("revision request does not bind the active proposal")
+        if route.selected_proposal_ref is not None or route.disposition in {
+            RouteDisposition.ADMIT,
+            RouteDisposition.REOPEN,
+        }:
+            raise CalibrationError("a selected proposal cannot be released for revision")
+        history = self._attempt_history.get(request_ref, [])
+        if not history or history[-1] != (draft, proposal):
+            raise CalibrationError("proposal attempt lineage is inconsistent")
+        del self._proposals[request_ref]
+        del self._drafts[request_ref]
+        return draft.proposal_attempt + 1, proposal.digest
+
+    def mark_admitted(
+        self,
+        request: ReasoningRequest,
+        *,
+        proposal_ref: str,
+        route: RouteDecision,
+    ) -> None:
+        """Permanently close replacement once the exact proposal is selected."""
+
+        request_ref = request.digest
+        try:
+            proposal = self._proposals[request_ref]
+        except KeyError as error:
+            raise CalibrationError("no active proposal attempt can be admitted") from error
+        if (
+            proposal.digest != proposal_ref
+            or route.selected_proposal_ref != proposal.digest
+            or route.disposition not in {RouteDisposition.ADMIT, RouteDisposition.REOPEN}
+        ):
+            raise CalibrationError("admission does not bind the active proposal attempt")
+        admitted = self._admitted_proposal_refs.get(request_ref)
+        if admitted is not None and admitted != proposal.digest:
+            raise CalibrationError("another proposal attempt is already admitted")
+        self._admitted_proposal_refs[request_ref] = proposal.digest
+
+    def expected_revision(self, request: ReasoningRequest) -> tuple[int, str | None]:
+        """Expose the exact numbered successor required for an unexecuted request."""
+
+        request_ref = request.digest
+        if request_ref in self._admitted_proposal_refs:
+            raise CalibrationError("an admitted proposal has no revision aperture")
+        active = self._drafts.get(request_ref)
+        if active is not None:
+            return active.proposal_attempt, active.supersedes_proposal_ref
+        history = self._attempt_history.get(request_ref, [])
+        if not history:
+            return 1, None
+        draft, proposal = history[-1]
+        return draft.proposal_attempt + 1, proposal.digest
 
     def propose(self, request: ReasoningRequest) -> Sequence[CandidateProposal]:
         try:
