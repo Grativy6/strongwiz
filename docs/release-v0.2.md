@@ -36,8 +36,11 @@ original-filename header,
 compares every post-normalization artifact hash, rechecks that source identity
 stayed unchanged, and records the source commit/tree and epoch. It accepts only
 one safe distribution root containing regular files and directories, portable
-noncolliding paths, ordinary permission bits, canonical empty ownership names
-and zero IDs, no links, and no non-temporal PAX metadata.
+noncolliding paths, ordinary permission bits, no links, and no non-temporal PAX
+metadata. Backend-supplied ownership IDs and names are preserved without being
+interpreted, normalized, or certified. The emitted archive is reopened and
+validated before replacement, so ownership values that would synthesize new
+PAX metadata are refused without modifying the original artifact.
 Paths, modes, payloads, and other accepted member metadata are preserved. The
 receipt's claim is deliberately limited to two local builds after this declared
 normalization; it is not a general cross-host reproducibility claim. The script

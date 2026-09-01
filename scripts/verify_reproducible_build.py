@@ -103,16 +103,8 @@ def _validated_sdist_members(
             raise ValueError(f"sdist member type is not supported: {name!r}")
         if member.mode & ~0o777:
             raise ValueError(f"sdist member has unsupported mode bits: {name!r}")
-        if (
-            member.uid != 0
-            or member.gid != 0
-            or member.uname
-            or member.gname
-            or member.linkname
-        ):
-            raise ValueError(
-                f"sdist member has unsupported ownership or link metadata: {name!r}"
-            )
+        if member.linkname:
+            raise ValueError(f"sdist member has unsupported link metadata: {name!r}")
         if set(member.pax_headers) - {"mtime"}:
             raise ValueError(f"sdist member has unsupported PAX metadata: {name!r}")
     if root_count != 1:
@@ -165,6 +157,12 @@ def _normalize_sdist(path: Path, source_date_epoch: int) -> None:
                         target.addfile(normalized, payload)
                 raw_output.flush()
                 os.fsync(raw_output.fileno())
+        with tarfile.open(temporary, "r:gz") as emitted:
+            emitted_members = _validated_sdist_members(emitted, expected_root)
+            if any(member.mtime != source_date_epoch for member in emitted_members):
+                raise ValueError("normalized sdist did not preserve SOURCE_DATE_EPOCH")
+            if any(member.pax_headers for member in emitted_members):
+                raise ValueError("normalized sdist synthesized unsupported PAX metadata")
         os.replace(temporary, path)
     except BaseException:
         temporary.unlink(missing_ok=True)
@@ -268,6 +266,7 @@ def main(argv: list[str] | None = None) -> int:
             "gzip_header_mtime": "SOURCE_DATE_EPOCH",
             "gzip_stream": "recompressed-with-python-gzip",
             "other_member_metadata": "preserved",
+            "ownership_metadata": "preserved",
             "pax_member_mtime": "removed",
             "tar_member_mtime": "SOURCE_DATE_EPOCH",
         },

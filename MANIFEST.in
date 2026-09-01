@@ -8,7 +8,7 @@ include README.md
 include SECURITY.md
 include THIRD_PARTY_NOTICES.md
 include requirements-dev.lock.txt
-recursive-include docs *.json *.md
+recursive-include docs *.json *.jsonl *.md
 recursive-include examples *.py
 recursive-include scripts *.py
 global-exclude __pycache__ *.py[cod]

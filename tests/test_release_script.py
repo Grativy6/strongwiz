@@ -46,12 +46,20 @@ def _write_nondeterministic_sdist(path: Path, *, timestamp: float) -> None:
         directory.type = tarfile.DIRTYPE
         directory.mode = 0o755
         directory.mtime = timestamp
+        directory.uid = 1001
+        directory.gid = 1002
+        directory.uname = "builder"
+        directory.gname = "builders"
         archive.addfile(directory)
         payload = b"deterministic source bytes\n"
         member = tarfile.TarInfo("strongwiz-0.2.0/source.txt")
         member.size = len(payload)
         member.mode = 0o644
         member.mtime = timestamp
+        member.uid = 1003
+        member.gid = 1004
+        member.uname = "packager"
+        member.gname = "packagers"
         archive.addfile(member, io.BytesIO(payload))
 
 
@@ -127,12 +135,16 @@ def _write_sdist_with_custom_member(
     member_type: bytes = tarfile.REGTYPE,
     linkname: str = "",
     uid: int = 0,
+    gid: int = 0,
+    uname: str = "",
+    gname: str = "",
     mode: int = 0o644,
     pax_headers: dict[str, str] | None = None,
     additional_member_names: tuple[str, ...] = (),
+    archive_format: int = tarfile.PAX_FORMAT,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(path, "w:gz", format=tarfile.PAX_FORMAT) as archive:
+    with tarfile.open(path, "w:gz", format=archive_format) as archive:
         root = tarfile.TarInfo("strongwiz-0.2.0")
         root.type = tarfile.DIRTYPE
         archive.addfile(root)
@@ -142,6 +154,9 @@ def _write_sdist_with_custom_member(
                 member.type = member_type
                 member.linkname = linkname
                 member.uid = uid
+                member.gid = gid
+                member.uname = uname
+                member.gname = gname
                 member.mode = mode
                 member.pax_headers = pax_headers or {}
             payload = b"payload\n" if member.isfile() else b""
@@ -212,6 +227,18 @@ def test_sdist_normalization_rejects_special_members(tmp_path: Path) -> None:
         _normalize_sdist(path, 1_600_000_000)
 
 
+def test_sdist_normalization_rejects_link_metadata_on_regular_files(tmp_path: Path) -> None:
+    path = tmp_path / "strongwiz-0.2.0.tar.gz"
+    _write_sdist_with_custom_member(
+        path,
+        "strongwiz-0.2.0/source.txt",
+        linkname="../../outside",
+    )
+
+    with pytest.raises(ValueError, match="unsupported link metadata"):
+        _normalize_sdist(path, 1_600_000_000)
+
+
 def test_sdist_normalization_rejects_non_temporal_pax_metadata(tmp_path: Path) -> None:
     path = tmp_path / "strongwiz-0.2.0.tar.gz"
     _write_sdist_with_custom_member(
@@ -224,16 +251,43 @@ def test_sdist_normalization_rejects_non_temporal_pax_metadata(tmp_path: Path) -
         _normalize_sdist(path, 1_600_000_000)
 
 
-def test_sdist_normalization_rejects_noncanonical_ownership(tmp_path: Path) -> None:
+def test_sdist_normalization_preserves_backend_ownership_metadata(tmp_path: Path) -> None:
     path = tmp_path / "strongwiz-0.2.0.tar.gz"
     _write_sdist_with_custom_member(
         path,
         "strongwiz-0.2.0/source.txt",
         uid=123,
+        gid=456,
+        uname="runner",
+        gname="docker",
     )
+    before = _semantic_manifest(path)
 
-    with pytest.raises(ValueError, match="unsupported ownership or link metadata"):
+    _normalize_sdist(path, 1_600_000_000)
+
+    assert _semantic_manifest(path) == before
+
+
+def test_sdist_normalization_rejects_synthesized_ownership_pax_metadata(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "strongwiz-0.2.0.tar.gz"
+    _write_sdist_with_custom_member(
+        path,
+        "strongwiz-0.2.0/source.txt",
+        uid=1_000_000_000_000,
+        gid=1_000_000_000_001,
+        archive_format=tarfile.GNU_FORMAT,
+    )
+    original = path.read_bytes()
+    with tarfile.open(path, "r:gz") as archive:
+        assert all(not member.pax_headers for member in archive.getmembers())
+
+    with pytest.raises(ValueError, match="unsupported PAX metadata"):
         _normalize_sdist(path, 1_600_000_000)
+
+    assert path.read_bytes() == original
+    assert not path.with_name(f".{path.name}.normalized").exists()
 
 
 def test_sdist_normalization_rejects_special_mode_bits(tmp_path: Path) -> None:
@@ -265,6 +319,11 @@ def test_build_requires_the_expected_wheel_and_sdist(
     monkeypatch.setattr(release_script.subprocess, "run", fake_build)
     with pytest.raises(RuntimeError, match="exactly the expected sdist and wheel"):
         _build(root, output, 1_600_000_000)
+
+
+def test_source_distribution_manifest_includes_capsule_jsonl() -> None:
+    manifest = (Path(__file__).resolve().parents[1] / "MANIFEST.in").read_text(encoding="utf-8")
+    assert "recursive-include docs *.json *.jsonl *.md" in manifest
 
 
 @pytest.mark.parametrize(
