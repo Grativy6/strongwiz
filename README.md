@@ -106,6 +106,9 @@ strongwiz verify-ledger path/to/run.sqlite3
 
 Run [`examples/shadow_route.py`](examples/shadow_route.py) for a complete
 nonexecuting route through the declared proposal/control boundary.
+The audited foundation commands, results, reproducible-wheel hash, and claim
+ceiling are recorded in
+[`docs/foundation-verification.md`](docs/foundation-verification.md).
 
 ## Laboratory rules
 
@@ -131,6 +134,7 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Retention ablations](docs/retention-ablation.md)
 - [Claim boundary](docs/claim-boundary.md)
 - [Provenance](docs/provenance.md)
+- [Foundation verification receipt](docs/foundation-verification.md)
 
 ## Stewardship, provenance, and license
 
