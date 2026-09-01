@@ -1,0 +1,49 @@
+{
+  "adversarial_audits": {
+    "material_blockers_remaining": 0,
+    "read_only_audits": 2,
+    "status": "PASS"
+  },
+  "branch": "codex/strongwiz-foundation",
+  "claim_class": "local-pre-alpha-foundation",
+  "claim_ceiling": [
+    "not an autonomous Kaggle entry",
+    "not an ARC-AGI-3 WIN receipt",
+    "not a hostile-code sandbox",
+    "not a durable distributed exactly-once executor",
+    "not proof of caller-supplied causal isolation",
+    "not evidence of general intelligence"
+  ],
+  "implementation_commit": "d853a5186594e53103b156ac093092f24ba854c0",
+  "lab_rules": {
+    "pea_core": "1.1.3",
+    "pecan": "1.0.4",
+    "seed": "0.3"
+  },
+  "recorded_at": "2026-09-01T03:36:27-04:00",
+  "schema": "strongwiz.foundation-verification.v1",
+  "status": "PASS",
+  "verification": {
+    "branch_coverage_percent": "85.66",
+    "coverage_gate_percent": "85.00",
+    "diff_check": "PASS_WITH_LINE_ENDING_WARNINGS_ONLY",
+    "mypy_source_files": 24,
+    "mypy_strict": "PASS",
+    "ruff_format_files": 53,
+    "ruff_format": "PASS",
+    "ruff_lint": "PASS",
+    "secret_pattern_files": 0,
+    "shadow_route_example": "PASS",
+    "tests_failed": 0,
+    "tests_passed": 118
+  },
+  "wheel": {
+    "filename": "strongwiz-0.1.0.dev0-py3-none-any.whl",
+    "fresh_environment_smoke": "PASS",
+    "pydantic_version": "2.13.5",
+    "python_version": "3.12.14",
+    "reproducible_builds": "2/2 exact SHA-256 match",
+    "sha256": "62176ecd7a297126168f767c8bb315838cf51ff8f11837fb9e60fdb02c89e261",
+    "source_date_epoch": 1788248095
+  }
+}

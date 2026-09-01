@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "strongwiz"
+version = "0.1.0.dev0"
+description = "A model-neutral laboratory for evidence-bounded reasoning"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "CC-BY-4.0"
+license-files = ["LICENSE"]
+authors = [{name = "Christopher D. Pang"}]
+keywords = ["reasoning", "agents", "evidence", "experiments", "world-models"]
+dependencies = ["pydantic>=2.11,<3"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.17,<2",
+  "pytest>=8,<9",
+  "pytest-cov>=6,<8",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+strongwiz = "strongwiz.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Grativy6/strongwiz"
+Repository = "https://github.com/Grativy6/strongwiz"
+Issues = "https://github.com/Grativy6/strongwiz/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --basetemp=.pytest-tmp"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 96
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/strongwiz"]
+plugins = ["pydantic.mypy"]
+
+[tool.coverage.run]
+branch = true
+source = ["strongwiz"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
