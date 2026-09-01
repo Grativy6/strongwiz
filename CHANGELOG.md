@@ -36,8 +36,8 @@ Publication remains pending an explicitly authorized tag and release.
   tests.
 - Six-paper and PEA/PECAN/SEED source identities.
 - GPPR as a delete/swap-safe experimental declaration, disabled by default.
-- A generic non-ARC end-to-end reference laboratory and reproducible-build
-  verifier.
+- A generic non-ARC end-to-end reference laboratory and a narrowly scoped local
+  two-build artifact-identity verifier.
 
 ### Claim boundary
 

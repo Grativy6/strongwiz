@@ -199,6 +199,7 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Claim boundary](docs/claim-boundary.md)
 - [Provenance](docs/provenance.md)
 - [v0.2 release gate](docs/release-v0.2.md)
+- [v0.2 verification and evidence](docs/v0.2-verification.md)
 - [Foundation verification receipt](docs/foundation-verification.md)
 
 ## Stewardship, provenance, and license
