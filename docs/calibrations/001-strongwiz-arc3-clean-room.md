@@ -76,6 +76,15 @@ Codex process with no conversation fork will make every proposal. The parent
 may operate infrastructure and verify evidence but may not recommend an action,
 interpret a frame for the operator, or transmit the stale content.
 
+Before game access, the same collaboration-status behavior also exposed the
+generic harness implementer and an independent code-audit process to unrelated
+prior gameplay text. Neither process requested, used, or relayed that content,
+and neither had accessed an environment or selected an action. Both are
+non-clean-room infrastructure processes and are disqualified from gameplay.
+These incidents do not contaminate the uncreated no-fork operator, but they must
+remain in the handoff and terminal incident record. The operator must not call
+collaboration-status or agent-management tools during play.
+
 ## Toolbelt and run separation
 
 Strongwiz source is the frozen toolbelt object. The lab genesis, raw frames,
