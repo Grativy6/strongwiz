@@ -1,0 +1,115 @@
+# Architecture
+
+Strongwiz is a model-neutral reasoning laboratory. It sits between replaceable
+reasoning providers and replaceable problem domains, preserving what was
+observed, what was inferred, why a proposal was selected, what an external
+executor did, and what changed afterward.
+
+The kernel is intentionally not a model, autonomous authority, or domain
+solver. Models propose. Control-owned policy routes. An external executor may
+act only when the execution coordinator consumes an independently supplied
+grant and exact one-use permit at the call boundary. A domain adapter
+interprets the resulting state and remains authoritative for its own terminal
+condition.
+
+## Declared boundary
+
+The pre-alpha public boundary candidate is versioned as
+`strongwiz.contract.v1`. Contract values
+are closed, immutable, validated, and content-addressable. Canonical
+JSON excludes non-finite numbers and duplicate keys so equal evidence has one
+stable representation.
+
+The four principal contracts are:
+
+- **Observation:** a domain, scope, epoch, raw-payload evidence reference,
+  concise summary, and the action names available at that moment. An
+  observation does not contain an interpretation.
+- **Action:** an `ActionSpec` containing a symbolic name and JSON parameters.
+  A `CandidateProposal` binds it to the current observation, goal, meaningful
+  distinction, falsifiable prediction, evidence, declared costs, and concise
+  rationale. A proposal is not permission to act.
+- **Memory:** exact-version account headers, derived facts, mechanic versions,
+  goal transitions, residual lineage, and continuation snapshots. Reuse must
+  match its producer, scope, version, and epoch or pass an explicit transfer
+  rule. Supersession and reopening preserve prior identity.
+- **Receipt:** an immutable payload in a single-writer SQLite ledger plus a
+  hash-chained `strongwiz.receipt.v1` envelope. Session and experiment receipts
+  bind decisions, outcomes, limitations, and terminal disposition. A receipt
+  establishes the recorded trace under its stated boundary; it does not make
+  the payload true.
+
+The SQLite ledger is the replay surface: it verifies every canonical object,
+receipt occurrence, parent reference, table projection, and hash-chain link.
+`export_receipt_projection_jsonl` is deliberately named as a projection because
+it exports envelopes and primary payloads, not every referenced object needed
+to reconstruct a complete run.
+
+## Components
+
+`contracts` defines the cross-boundary values. `drivers` defines model, domain,
+capability, and executor protocols. `runtime` enforces the scan, decision, and
+assessment lifecycle. `routing` evaluates identity, witness, scope, trace,
+authority, consequence, resource, and re-entry guards without executing an
+action. `orchestration` binds an admitted route to the exact control snapshot,
+PEA/PECAN/SEED decision, task grant, goal ID/digest pair, proposal, action,
+observation ID/digest pair, scope, executor, and single-use permit. Its
+`execute_once` bridge owns the writer call, returns separate release and
+execution-attempt receipts inside an immutable, nonserializable coordinator-issued
+result, and never exposes a reusable bare permit token.
+Its writer receives a non-authorizing command with the exact invocation and
+idempotency identities. Once that call begins, an exception is recorded as an
+unknown effect rather than evidence that nothing happened.
+The task grant explicitly classifies whether human-facing release review is
+required; the coordinator derives the SEED gate from that control-owned field
+or a proposal-declared `OUTPUT` effect, never from the decision being checked.
+
+The remaining modules are replaceable reasoning services:
+
+- `goals`, `learning`, and `policy` manage goal-relevant distinctions,
+  factored prediction residuals, local repair, and fast/deep cadence;
+- `facts`, `feedback`, and `accounts` retain earned facts, branch-safe
+  continuation state, exact versions, and reopening handles;
+- `planning` supplies bounded deterministic graph search;
+- `experiments` supplies fixed-denominator retention ablations and honest
+  attempt dispositions;
+- `measurements` supplies canonical rational and interval quantities for
+  scientific domains without binary floating-point drift;
+- `authority` keeps grants external, revocable, scoped, and revalidated before
+  release;
+- `lab_policy` exposes the PEA, PECAN, and SEED control interfaces;
+- `integrity` binds source, configuration, dependencies, model artifacts,
+  adapters, capabilities, and policies into a frozen runtime manifest.
+
+## Separation invariants
+
+Strongwiz preserves these distinctions across every adapter:
+
+- observation is not interpretation;
+- a candidate rule is not an accepted rule;
+- description is not recommendation, permission, or authorization;
+- model output is not control state;
+- a routed proposal is not an executed action;
+- a prediction match is support, not proof;
+- a terminal-looking state is not success unless the domain authority says so;
+- a closed attentional surface remains reopenable when new evidence makes it
+  relevant again.
+
+Every session also binds one validated `FrozenRuntimeManifest` object. When a
+ledger is present, that manifest is stored in the content-addressed object
+store and referenced by every session receipt. This establishes declared
+runtime identity. The exact model-driver object, its version/artifact, the
+domain version/artifact, and active router/cadence digests must match that
+manifest at initialization and again at their call boundaries. This revalidates
+declared identity; it is not a hostile-code sandbox or proof of loaded-code
+identity. File-level verification remains a separate explicit check.
+
+Session transitions use persist-before-advance ordering when a ledger is
+configured. A failed durable append cannot leave the session able to act on an
+unreceipted scan or decision. Assessment additionally requires the matching
+completed release, execution-attempt receipt, executor evidence, and the exact
+decision route/control pair.
+
+Provider packages are drivers, domain packages are adapters, and Hearthline or
+another configured product may compose them as a distribution. None of those
+identities belongs in the kernel contract.
