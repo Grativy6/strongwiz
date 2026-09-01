@@ -14,8 +14,7 @@ condition.
 
 ## Declared boundary
 
-The pre-alpha public boundary candidate is versioned as
-`strongwiz.contract.v1`. Contract values
+The public boundary candidate is versioned as `strongwiz.contract.v1`. Contract values
 are closed, immutable, validated, and content-addressable. Canonical
 JSON excludes non-finite numbers and duplicate keys so equal evidence has one
 stable representation.
@@ -43,7 +42,9 @@ The SQLite ledger is the replay surface: it verifies every canonical object,
 receipt occurrence, parent reference, table projection, and hash-chain link.
 `export_receipt_projection_jsonl` is deliberately named as a projection because
 it exports envelopes and primary payloads, not every referenced object needed
-to reconstruct a complete run.
+to reconstruct a complete run. `lab.pack_evidence` closes that gap for sealed
+runs by exporting every object and every receipt into a portable capsule whose
+manifest binds both complete projections.
 
 ## Components
 
@@ -79,7 +80,17 @@ The remaining modules are replaceable reasoning services:
   release;
 - `lab_policy` exposes the PEA, PECAN, and SEED control interfaces;
 - `integrity` binds source, configuration, dependencies, model artifacts,
-  adapters, capabilities, and policies into a frozen runtime manifest.
+  adapters, capabilities, and policies into a frozen runtime manifest;
+- `modelkit` binds plain local callbacks or framed offline model processes to
+  exact Strongwiz requests without giving the provider control state;
+- `transport` supplies bounded canonical binary frames, partial-I/O handling,
+  checksums, timeouts, and a declared replay window;
+- `conformance` supplies non-authorizing structural fixture reports for model
+  and domain adapters;
+- `lab` supplies zero-state genesis, predeclared runs, immutable terminal
+  seals, complete evidence capsules, and non-adopting promotion receipts;
+- `features` keeps experimental capabilities replaceable and inert by default;
+- `provenance` validates the exact paper and policy source registry.
 
 ## Separation invariants
 
@@ -109,6 +120,23 @@ configured. A failed durable append cannot leave the session able to act on an
 unreceipted scan or decision. Assessment additionally requires the matching
 completed release, execution-attempt receipt, executor evidence, and the exact
 decision route/control pair.
+
+`SessionCheckpoint` extends the concise `SessionReceipt` with exactly the
+active request, pending proposal, repeated-failure guard, account/version, and
+history needed to restart any phase. Restoration revalidates the frozen
+runtime, driver, domain, policies, account, exact latest ledger boundary, and
+parent chain, then continues without repeating a model call or environment
+action. The checkpoint is a distinct `strongwiz.session-checkpoint.v1` wire
+schema; consumers needing `strongwiz.session-receipt.v1` must use the explicit
+`concise_receipt()` projection. A checkpoint with any durable receipt lineage
+can only be restored with its original ledger; only a genuinely ledgerless
+checkpoint may be transported without one.
+
+The reusable Strongwiz source/runtime and an experiment lab are separate
+objects. A lab begins with a recorded empty ledger and no domain state. A later
+run may promote only a bounded candidate mechanism through a separate receipt;
+it cannot silently inherit action sequences, learned domain state, replay
+state, hidden reasoning, or authority.
 
 Provider packages are drivers, domain packages are adapters, and Hearthline or
 another configured product may compose them as a distribution. None of those

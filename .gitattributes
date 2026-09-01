@@ -1,0 +1,2 @@
+# Receipt and capsule hashes bind exact bytes; never rewrite their line endings.
+docs/receipts/** -text

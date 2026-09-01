@@ -19,6 +19,17 @@ status, or action receipt. Hosted models, local models, symbolic systems, and
 human-in-the-loop proposers can use the same interface. Hidden chain-of-thought
 is neither requested nor part of the contract.
 
+`CallableModelDriver` is the smallest local integration: the provider returns
+`ProposalDraft` values and Strongwiz supplies exact request bindings.
+`FramedModelDriver` carries those same drafts over bounded, length-prefixed,
+canonical binary JSON. It validates checksums, strict UTF-8, exact reply
+identity, partial I/O, timeouts, size limits, and replay within a declared
+window. It does not use a TTY or newline-delimited protocol and makes no network
+call. Framed reconstruction requires a caller-retained
+`FramedModelRestartState`; crash durability additionally requires the caller's
+state sink to persist each reservation before returning. The adapter does not
+supervise or restart a provider process.
+
 ## Domain adapters
 
 A `DomainAdapter` has an ID, version, and artifact reference. It normalizes raw observations, declares available actions,
@@ -91,3 +102,8 @@ Compatibility should be tested at two levels:
   rejection, and control separation;
 - behavioral tests: deterministic fixtures, budget ceilings, malformed driver
   output, grant replacement, terminal handling, and receipt replay.
+
+The `conformance` module provides one bounded structural fixture for model and
+domain adapters. A pass is useful admission evidence for a lab manifest, but it
+does not establish model quality, repeatability beyond the fixture, domain
+completeness, executor safety, or authorization.

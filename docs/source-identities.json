@@ -1,0 +1,95 @@
+{
+  "schema": "strongwiz.source-identities.v1",
+  "shared_lineage_is_independent_corroboration": false,
+  "source_text_is_authorization": false,
+  "sources": [
+    {
+      "authority_ceiling": "bounded conceptual source; does not grant authority or amend the kernel",
+      "local_artifact_sha256": "f3b57da98db3b105e6a67b2c76471123365041ce86e53977be5aa7002b84c46a",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22168887",
+      "role": "proposal-control separation, accounts, residuals, guards, and reopening",
+      "source_id": "paper-a0bk-v0.10.0",
+      "source_kind": "paper",
+      "title": "A0 Software Boundary-Layer Kernel",
+      "version": "0.10.0"
+    },
+    {
+      "authority_ceiling": "bounded conceptual source; does not establish that context alone is a complete model",
+      "local_artifact_sha256": "a777d28734ebb58b7d83481bb2549bfb40c88acdb20db8b591dd9f78c7c3b79c",
+      "persistent_id": "https://doi.org/10.5281/zenodo.21831000",
+      "role": "context geometry, local maps, route distinctions, and reopening",
+      "source_id": "paper-context-draws-map-v1.0",
+      "source_kind": "paper",
+      "title": "The Context Draws a Map",
+      "version": "1.0"
+    },
+    {
+      "authority_ceiling": "bounded conceptual source; does not establish a complete ontology or model theory",
+      "local_artifact_sha256": "dd6bb0c5b3df6f65ba7b24a21d338b0a1a2f6b75dd79eff04045ef27d8bccc6d",
+      "persistent_id": "https://doi.org/10.5281/zenodo.21713134",
+      "role": "context identity, model/runtime separation, and state continuity",
+      "source_id": "paper-context-is-model-record-21713134",
+      "source_kind": "paper",
+      "title": "The Context Is the Model",
+      "version": "zenodo-record-21713134"
+    },
+    {
+      "authority_ceiling": "bounded conceptual source; cadence remains a replaceable policy input",
+      "local_artifact_sha256": "9ec887b802514c2fd525079e3c652ff7485eeff467dcfb7ea7c0846be12657ce",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22214952",
+      "role": "cadence, phase-sensitive refresh, and investigation scheduling",
+      "source_id": "paper-context-rhythm-v0.1",
+      "source_kind": "paper",
+      "title": "The Context Sets a Rhythm",
+      "version": "0.1"
+    },
+    {
+      "authority_ceiling": "experimental geometry only; no universal optimization claim",
+      "local_artifact_sha256": "0e4da7c6a000ad55ec712c4c8495c2c7e70018227f8b7b53b38c28eab9083bf7",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22225414",
+      "role": "optional geometry-aware path selection behind an off-by-default feature",
+      "source_id": "paper-gppr-v0.1",
+      "source_kind": "paper",
+      "title": "Golden Phase Prime Ribbons",
+      "version": "0.1"
+    },
+    {
+      "authority_ceiling": "bounded lemma source; does not turn transport evidence into proof of unrelated claims",
+      "local_artifact_sha256": "c9168a69ece8e405d643a86580e6637001de3f14514495d9b3943ce943e0290e",
+      "persistent_id": "https://doi.org/10.5281/zenodo.21882601",
+      "role": "single-cut transport accounting and exact boundary crossings",
+      "source_id": "paper-single-cut-transport-v0.1",
+      "source_kind": "paper",
+      "title": "PAL Single-Cut Transport Lemma",
+      "version": "0.1"
+    },
+    {
+      "authority_ceiling": "candidate ethical review only; does not decide, execute, or create law",
+      "persistent_id": "owner-supplied:pea-core:1.1.3",
+      "role": "control-owned review of standing, consent, privacy, reversibility, remedy, and contest",
+      "source_id": "policy-pea-core-v1.1.3",
+      "source_kind": "policy",
+      "title": "PEA Core",
+      "version": "1.1.3"
+    },
+    {
+      "authority_ceiling": "crossing audit only; description, recommendation, permission, and authorization remain distinct",
+      "persistent_id": "owner-supplied:pecan:1.0.4",
+      "role": "control-owned audit of consequential crossings",
+      "source_id": "policy-pecan-v1.0.4",
+      "source_kind": "policy",
+      "title": "PECAN",
+      "version": "1.0.4"
+    },
+    {
+      "authority_ceiling": "human-facing release review only; does not manufacture dependency or model standing",
+      "persistent_id": "owner-supplied:seed:0.3",
+      "role": "agency-preserving release and natural-stop review",
+      "source_id": "policy-seed-v0.3",
+      "source_kind": "policy",
+      "title": "SEED",
+      "version": "0.3"
+    }
+  ],
+  "steward": "Christopher D. Pang"
+}
