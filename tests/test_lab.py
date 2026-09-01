@@ -247,7 +247,7 @@ def test_verify_refuses_symlinks_inside_lab(tmp_path: Path) -> None:
         link.symlink_to(target)
     except OSError:
         pytest.skip("symbolic-link creation is unavailable on this host")
-    with pytest.raises(LabError, match="symbolic links"):
+    with pytest.raises(LabError, match="link-like paths"):
         verify_lab(root)
 
 
@@ -696,5 +696,5 @@ def test_capsule_root_symlink_is_refused(tmp_path: Path) -> None:
         os.symlink(actual, link, target_is_directory=True)
     except OSError:
         pytest.skip("symbolic-link creation is unavailable on this host")
-    with pytest.raises(LabError, match="symbolic link"):
+    with pytest.raises(LabError, match="link-like path"):
         verify_evidence_capsule(link)
