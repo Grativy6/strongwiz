@@ -230,7 +230,6 @@ def test_asset_acquisition_is_download_only_sanitized_and_keyless(tmp_path: Path
     metadata = canonical_bytes(
         {
             "baseline_actions": [1, 2, 3],
-            "class_name": "Ls20",
             "default_fps": 7,
             "game_id": "ls20-version123",
             "private_tags": ["do-not-project"],
@@ -256,6 +255,7 @@ def test_asset_acquisition_is_download_only_sanitized_and_keyless(tmp_path: Path
     assert client.calls[1][1]["X-Api-Key"] == anonymous_key
     assert manifest.environment_constructed is False
     assert manifest.anonymous_key_persisted is False
+    assert manifest.class_name == "Ls20"
     safe_metadata = parse_strict_json(
         (tmp_path / manifest.metadata_file.relative_path).read_bytes()
     )

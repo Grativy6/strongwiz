@@ -85,6 +85,14 @@ These incidents do not contaminate the uncreated no-fork operator, but they must
 remain in the handoff and terminal incident record. The operator must not call
 collaboration-status or agent-management tools during play.
 
+The first authorized low-level acquisition attempt obtained a transient
+anonymous capability and the targeted `ls20` metadata, then stopped before the
+source request because the live response omitted `class_name`. The capability
+and metadata response were not retained, no environment was constructed, and
+no reset or gameplay action occurred. The compatibility repair adopts the
+exact `arc-agi==0.9.9` class-name fallback and is committed before acquisition
+is retried.
+
 ## Toolbelt and run separation
 
 Strongwiz source is the frozen toolbelt object. The lab genesis, raw frames,

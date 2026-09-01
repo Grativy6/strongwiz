@@ -195,9 +195,13 @@ class OfficialAssetAcquirer:
         if not isinstance(metadata_value, Mapping):
             raise CalibrationError("official game metadata is not an object")
         exact_game_id = metadata_value.get("game_id")
-        class_name = metadata_value.get("class_name")
         if not isinstance(exact_game_id, str) or not exact_game_id.startswith("ls20-"):
             raise CalibrationError("official metadata lacks the expected versioned game ID")
+        class_name = metadata_value.get("class_name")
+        if class_name is None:
+            # Pinned arc-agi 0.9.9 uses this exact fallback when the public
+            # metadata response omits class_name.
+            class_name = game_id[0].upper() + game_id[1:]
         if not isinstance(class_name, str) or not _CLASS_NAME.fullmatch(class_name):
             raise CalibrationError("official metadata lacks a safe class name")
         _safe_component(exact_game_id, "exact game ID")
@@ -213,8 +217,7 @@ class OfficialAssetAcquirer:
         metadata_relative = relative_dir / "metadata.json"
         source_relative = relative_dir / f"{class_name.lower()}.py"
 
-        # Private tags and baseline actions are intentionally not projected to the
-        # operational metadata. Their response bytes contribute only an opaque hash.
+        # Private tags and baseline actions are intentionally not projected or hashed.
         default_fps = metadata_value.get("default_fps", 5)
         title = metadata_value.get("title", game_id)
         if (
