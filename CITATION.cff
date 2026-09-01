@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If Strongwiz informed your work, please cite this repository."
+title: "Strongwiz"
+type: software
+authors:
+  - family-names: "Pang"
+    given-names: "Christopher D."
+repository-code: "https://github.com/Grativy6/strongwiz"
+license: "CC-BY-4.0"
+version: "0.1.0-dev"
+date-released: "2026-09-01"
