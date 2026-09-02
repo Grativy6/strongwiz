@@ -23,6 +23,7 @@ PREREGISTRATION_SCHEMA = "strongwiz.arc-agi3-calibration-preregistration.v1"
 ASSET_MANIFEST_SCHEMA = "strongwiz.arc-agi3-official-asset.v1"
 RUN_RECEIPT_SCHEMA = "strongwiz.arc-agi3-calibration-run-receipt.v1"
 _DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_GIT_OBJECT_ID = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 
 
 class AccessPolicy(ContractModel):
@@ -91,9 +92,16 @@ class OfficialDependencies(ContractModel):
 
 
 class ToolbeltIdentity(ContractModel):
-    commit: Literal["a85508dc11cc6ac30336f5c42344b62afdc86b24"]
+    commit: str
     repository: Literal["https://github.com/Grativy6/strongwiz"]
-    tree: Literal["9e58cb361919fca3638b1f76a00379740c4e4aa4"]
+    tree: str
+
+    @field_validator("commit", "tree")
+    @classmethod
+    def validate_git_object_id(cls, value: str) -> str:
+        if not _GIT_OBJECT_ID.fullmatch(value):
+            raise ValueError("toolbelt commit and tree must be full lowercase Git object IDs")
+        return value
 
 
 class CalibrationPreregistration(ContractModel):
