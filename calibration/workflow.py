@@ -169,8 +169,10 @@ def _verify_baseline(repository_root: Path, *, commit: str, tree: str) -> None:
     for relative in baseline_paths:
         working_path = repository_root / relative
         expected_blob = _git(repository_root, "rev-parse", f"{commit}:{relative}")
-        if not working_path.is_file() or working_path.is_symlink() or (
-            _working_tree_blob_id(repository_root, relative) != expected_blob
+        if (
+            not working_path.is_file()
+            or working_path.is_symlink()
+            or (_working_tree_blob_id(repository_root, relative) != expected_blob)
         ):
             raise CalibrationError(
                 "pinned kernel working-tree bytes differ from baseline after Git clean "

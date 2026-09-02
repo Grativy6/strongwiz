@@ -1,0 +1,215 @@
+{
+  "schema": "strongwiz.arc-agi3-calibration-public-artifact-index.v1",
+  "calibration_id": "002",
+  "game_id": "ls20-9607627b",
+  "result": {
+    "best_levels_completed": 1,
+    "completion_genuinely_observed": false,
+    "disposition": "partial",
+    "final_state": "NOT_FINISHED",
+    "win_levels": 7,
+    "stop_reason": "owner_requested_resource_pause"
+  },
+  "tracked_exact_copies": [
+    {
+      "path": "stage-1-to-2.transition-manifest.json",
+      "sha256": "df2ec2dddd0ce2383ce08c799ac4a089914e0fc1655a8d9ce8faa251a6531038",
+      "size_bytes": 4678
+    },
+    {
+      "path": "stage-1-to-2.transition-outcome.json",
+      "sha256": "3cb180e0de8e86acb209e61ef9775005f9077ebda99482cdb1d8313a5e49f590",
+      "size_bytes": 18427
+    },
+    {
+      "path": "stage-1-to-2.transition-verification.json",
+      "sha256": "6ad42e23188e0451da3af15768a2ce706e07899ab2df2fd6dd577056e96521ce",
+      "size_bytes": 738
+    },
+    {
+      "path": "stage-1.capsule-manifest.json",
+      "sha256": "87a25cabc32207817681cd58d594f864fbe4445a4bdad3ddad1e509441edcdc0",
+      "size_bytes": 126719
+    },
+    {
+      "path": "stage-1.delivery-receipt.json",
+      "sha256": "1295f531998f523a5b88bc3631bcbf99b8346481a0f6789936281cba75dc6ca8",
+      "size_bytes": 4382
+    },
+    {
+      "path": "stage-1.run-seal.json",
+      "sha256": "f45f7dd2c01af0646503676ee24163d715f5d3f1b24fe216e966b427312d1a5a",
+      "size_bytes": 125622
+    },
+    {
+      "path": "stage-1.terminal-record.json",
+      "sha256": "712814051cc622db18f9e03b5ef3c646baba6208310e8497f94662b8d7424fbe",
+      "size_bytes": 3324
+    },
+    {
+      "path": "stage-2-to-3.transition-manifest.json",
+      "sha256": "246e5aa6ec40f6104546d51e8c9ec43f58b349cc0017d3fe2647eb824e63431d",
+      "size_bytes": 5183
+    },
+    {
+      "path": "stage-2-to-3.transition-outcome.json",
+      "sha256": "5b77dab11a8589ba179eb7e099e44eaabe01960788467a56485a40ad092cdf2e",
+      "size_bytes": 18786
+    },
+    {
+      "path": "stage-2-to-3.transition-verification.json",
+      "sha256": "0307d1f45af35eb6dbccecf8bc1f7835ddb425ac6a26f129d85e2787d32dde0d",
+      "size_bytes": 738
+    },
+    {
+      "path": "stage-2.capsule-manifest.json",
+      "sha256": "0b1993058e4fbefe492d5271fe302268101d3cc13c9e41114faffed12c9fa9d0",
+      "size_bytes": 128664
+    },
+    {
+      "path": "stage-2.delivery-receipt.json",
+      "sha256": "fd05332bef11ee7a04a231444e902c1a6209a7737321061642b822033203f5a2",
+      "size_bytes": 4174
+    },
+    {
+      "path": "stage-2.run-seal.json",
+      "sha256": "277db6c48bcdb0f4e2116246bdfb72453f23213760b0b8398a074a18596f2323",
+      "size_bytes": 127567
+    },
+    {
+      "path": "stage-2.terminal-record.json",
+      "sha256": "f40b2805ccc16f0f981592a8d94ef273c9f4121ede75f380d39a375315b601de",
+      "size_bytes": 3116
+    },
+    {
+      "path": "stage-3-to-4.transition-manifest.json",
+      "sha256": "66de57d5ea94847804f7ef39ae919ec8a835ca394d04ae452809c4b0deeaa276",
+      "size_bytes": 4925
+    },
+    {
+      "path": "stage-3-to-4.transition-outcome.json",
+      "sha256": "0f4274394b5d4eafaec931951735cfb69ac9cc5b803f746455399f60f0c6a6f5",
+      "size_bytes": 18493
+    },
+    {
+      "path": "stage-3-to-4.transition-verification.json",
+      "sha256": "334e5356d08889a6c571d1720f3efba2ed7cdfd01cd0b55e82fc060c416ccf55",
+      "size_bytes": 738
+    },
+    {
+      "path": "stage-3.capsule-manifest.json",
+      "sha256": "f019ad03a1cf49ea6dad825aa01b4788a5c35e1179339299955e8842eaaa2c90",
+      "size_bytes": 395800
+    },
+    {
+      "path": "stage-3.delivery-receipt.json",
+      "sha256": "1a0e9783df61ccb17dfb5e860a9674ea8c5342201eaeba9d0f2269d66ecd9aa3",
+      "size_bytes": 3995
+    },
+    {
+      "path": "stage-3.run-seal.json",
+      "sha256": "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22",
+      "size_bytes": 394702
+    },
+    {
+      "path": "stage-3.terminal-record.json",
+      "sha256": "de767815125b2d20fdd072821c94d90f78102cae6156cea780ef8759a7ac6f86",
+      "size_bytes": 2937
+    },
+    {
+      "path": "stage-4.capsule-manifest.json",
+      "sha256": "3473cce40f4093bfb4383de496dbe063f71dd40699dcb47800494614fa73c16d",
+      "size_bytes": 82454
+    },
+    {
+      "path": "stage-4.delivery-receipt.json",
+      "sha256": "16dde5fbc12304c8ad6673cae40934e527f5b0dbfd6fa52aef6712c1fa100f78",
+      "size_bytes": 4031
+    },
+    {
+      "path": "stage-4.final-handoff.json",
+      "sha256": "97bc8535e29c355cd66d3458134d2533661c02067149cb783d6ce285632b0991",
+      "size_bytes": 879
+    },
+    {
+      "path": "stage-4.learning-metrics.json",
+      "sha256": "4d7b6d6e6ff034043c444954e4cd276cb3bd9fd424f82264e81aaeb7d057fdae",
+      "size_bytes": 1282
+    },
+    {
+      "path": "stage-4.operator-handoff.md",
+      "sha256": "75869fe4b3ce072377988df4aa0d3445e8a53cffb93fbae2de45f4cefbcd25e8",
+      "size_bytes": 2380
+    },
+    {
+      "path": "stage-4.reassessment.json",
+      "sha256": "c3a42c80bbf713fa6176ff9efc7953433e7f9b357cfd119ec665c81d13d69cb0",
+      "size_bytes": 1192
+    },
+    {
+      "path": "stage-4.run-seal.json",
+      "sha256": "8b70bce8b61a532a2fba0087e8c8edf92e68bbbbfe8ea0d01fab751420625142",
+      "size_bytes": 81359
+    },
+    {
+      "path": "stage-4.selected-recommendation-bundle.json",
+      "sha256": "3e77a0733201bc94c3e13abfdfd6e489d7ee212bd0f9b476b1ada1d344ca8561",
+      "size_bytes": 2789
+    },
+    {
+      "path": "stage-4.terminal-record.json",
+      "sha256": "456c6d01c1867fe97c53c95d378641dc82c9256de0f15425ec6a8ecb84b99d7a",
+      "size_bytes": 2975
+    },
+    {
+      "path": "stage-4.transferable-mechanics.json",
+      "sha256": "f9c13af325bab4ae57a9be0df0118fa814ce7adbff1a90882419cb0b771634ea",
+      "size_bytes": 1840
+    }
+  ],
+  "derived_public_receipts": [
+    {
+      "path": "campaign-summary.json",
+      "sha256": "7f9fc3acf5c61579b2262b0edfc2b1e0eb306d2ed4feee7e1244acf93e657de5",
+      "size_bytes": 5682
+    }
+  ],
+  "retained_local_only": {
+    "stage_1_ledger": {
+      "sha256": "aee8c7e3514ab1e8b0c5cf8969374e724563b2d8844b1a537c0f2c0afea52f95",
+      "size_bytes": 7360512
+    },
+    "stage_2_ledger": {
+      "sha256": "0a7ac7e38023c462ec7c75357ca718e2e2dec9c3c3e4ff6cca34f1760d4ad2be",
+      "size_bytes": 7168000
+    },
+    "stage_3_ledger": {
+      "sha256": "cedce8f861dcbdcedeb2660045a927fd439db5bb070cd99991c53f8303cb5e87",
+      "size_bytes": 24031232
+    },
+    "stage_4_ledger": {
+      "sha256": "7e126186cc97fa356a26deb303a54f1f08faf3005fa2b06ba09cb0aefb4a888b",
+      "size_bytes": 4694016
+    },
+    "learning_ledger": {
+      "sha256": "552b3fc8978e09566209da3c1824507ce802f0d2ba258579d0d94552df98bd28",
+      "size_bytes": 286720,
+      "receipt_count": 37,
+      "receipt_head": "a253b24742f4b39f3e15c01000ad9810c949a1948f3e28f737f708d07ec8424e"
+    },
+    "stage_1_to_2_review_ledger": {
+      "sha256": "e42b5e9c668f98207b0bb3060a0a76d16bf790db3a59053b1ab86f26df0182e1",
+      "size_bytes": 245760
+    },
+    "stage_2_to_3_review_ledger": {
+      "sha256": "61c6e982726b85292733a64c9f87a69c6f08b5006b7cced606bec182d4983e67",
+      "size_bytes": 249856
+    },
+    "stage_3_to_4_review_ledger": {
+      "sha256": "28be7c2e9366761b8b65b0e84a5d109b0c4310dc3367f53c65efa22c51072a24",
+      "size_bytes": 516096
+    },
+    "note": "Raw frames, traces, official recordings, ledgers, complete capsules, game source, and capabilities remain local and ignored. Terminal records retain raw-trace and official-recording identities."
+  },
+  "publication_boundary": "Exact metadata, control, transition, and handoff receipts are tracked. The complete replay/evidence specimen remains local and content-addressed; this Git set alone cannot replay or independently inspect omitted raw evidence."
+}

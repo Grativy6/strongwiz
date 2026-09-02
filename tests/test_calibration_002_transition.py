@@ -240,14 +240,17 @@ def test_approved_transition_is_target_bound_receipt_backed_and_reopenable(
     assert result.outcome.inheritance.curriculum_transfer.mechanic_refs == tuple(
         item.digest for item in source.retained_mechanics
     )
-    assert verify_transition_result(
-        source,
-        review,
-        result,
-        source_learning_ledger_path=learning_path,
-        review_ledger_path=review_ledger,
-        artifact_root=artifacts,
-    ) == result.verification
+    assert (
+        verify_transition_result(
+            source,
+            review,
+            result,
+            source_learning_ledger_path=learning_path,
+            review_ledger_path=review_ledger,
+            artifact_root=artifacts,
+        )
+        == result.verification
+    )
     assert (artifacts / "transition.manifest.json").read_bytes() == canonical_bytes(
         result.manifest
     )
@@ -443,14 +446,17 @@ def test_rejected_review_records_nonadoption_without_successor_material(
     assert result.outcome.adoption.status is AdoptionStatus.REJECTED
     assert result.outcome.shorthand_transfer is None
     assert result.outcome.inheritance is None
-    assert verify_transition_result(
-        source,
-        review,
-        result,
-        source_learning_ledger_path=learning_path,
-        review_ledger_path=review_ledger,
-        artifact_root=artifacts,
-    ) == result.verification
+    assert (
+        verify_transition_result(
+            source,
+            review,
+            result,
+            source_learning_ledger_path=learning_path,
+            review_ledger_path=review_ledger,
+            artifact_root=artifacts,
+        )
+        == result.verification
+    )
 
 
 def test_refinement_rejects_excluded_run_material() -> None:

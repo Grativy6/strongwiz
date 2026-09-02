@@ -19,9 +19,7 @@ def test_calibration_001_identity_remains_explicitly_pinned() -> None:
     assert loaded.preregistration.toolbelt.commit == (
         "a85508dc11cc6ac30336f5c42344b62afdc86b24"
     )
-    assert loaded.preregistration.toolbelt.tree == (
-        "9e58cb361919fca3638b1f76a00379740c4e4aa4"
-    )
+    assert loaded.preregistration.toolbelt.tree == ("9e58cb361919fca3638b1f76a00379740c4e4aa4")
 
 
 def test_calibration_002_stage_preregistrations_preserve_aggregate_match() -> None:
@@ -35,8 +33,7 @@ def test_calibration_002_stage_preregistrations_preserve_aggregate_match() -> No
     for stage in range(1, 5):
         loaded = load_preregistration(
             REPOSITORY_ROOT,
-            REPOSITORY_ROOT
-            / f"docs/calibrations/002-stage-{stage}-preregistration.json",
+            REPOSITORY_ROOT / f"docs/calibrations/002-stage-{stage}-preregistration.json",
         )
         prereg = loaded.preregistration
         assert prereg.toolbelt.commit == V2_COMMIT

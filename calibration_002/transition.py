@@ -354,8 +354,7 @@ class Calibration002AdvisoryReview(ContractModel):
         if self.kevin_review.reviewer_driver_ref != self.request.reviewer_driver_ref:
             raise ValueError("advisory review changed reviewer identity")
         paired = (
-            self.refinement_candidate is not None
-            and self.refinement_evaluation is not None
+            self.refinement_candidate is not None and self.refinement_evaluation is not None
         )
         if paired != (
             self.refinement_candidate is not None or self.refinement_evaluation is not None
@@ -934,9 +933,7 @@ def _find_receipt(
         and envelope.payload_hash == payload_ref
     )
     if len(matches) != 1:
-        raise Calibration002TransitionError(
-            f"review ledger requires one exact {kind} receipt"
-        )
+        raise Calibration002TransitionError(f"review ledger requires one exact {kind} receipt")
     return matches[0]
 
 
@@ -1102,11 +1099,7 @@ def apply_external_control(
                 adoption,
                 *((shorthand,) if shorthand is not None else ()),
                 *((inheritance,) if inheritance is not None else ()),
-                *(
-                    (inheritance.curriculum_transfer,)
-                    if inheritance is not None
-                    else ()
-                ),
+                *((inheritance.curriculum_transfer,) if inheritance is not None else ()),
                 outcome,
             )
         )
@@ -1213,8 +1206,7 @@ def verify_transition_result(
             account_id=review.review_account_id,
         )
         if not any(
-            item.digest == outcome.adoption.digest
-            for item in workspace.adoption_decisions
+            item.digest == outcome.adoption.digest for item in workspace.adoption_decisions
         ):
             raise Calibration002TransitionError("review workspace lost its adoption decision")
         if result.manifest.review_ledger_projection_ref != ledger.projection_hash:

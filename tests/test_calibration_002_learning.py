@@ -58,9 +58,10 @@ def test_campaign_persists_exact_plan_checkpoint_and_blank_stage(tmp_path) -> No
         success_condition_ref=ref("declared-terminal-condition"),
     )
 
-    assert tuple(
-        stage.resource_budget.wall_clock_ms // 60_000 for stage in sidecar.plan.stages
-    ) == CALIBRATION_002_STAGE_MINUTES
+    assert (
+        tuple(stage.resource_budget.wall_clock_ms // 60_000 for stage in sidecar.plan.stages)
+        == CALIBRATION_002_STAGE_MINUTES
+    )
     assert tuple(stage.mode for stage in sidecar.plan.stages) == (
         CurriculumMode.BASELINE,
         CurriculumMode.ACQUIRE,
@@ -151,9 +152,7 @@ def test_append_adapt_recommend_table_and_run_local_source_gate(tmp_path) -> Non
                 evaluation_id="foreign-source",
             )
 
-        local = foreign.model_copy(
-            update={"source_payload_refs": (source.source_payload_ref,)}
-        )
+        local = foreign.model_copy(update={"source_payload_refs": (source.source_payload_ref,)})
         adaptation = sidecar.adapt(
             proposals=(local,),
             samples=samples,

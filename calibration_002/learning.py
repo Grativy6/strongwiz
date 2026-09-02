@@ -107,12 +107,9 @@ def _reject_excluded_payload(value: object, *, path: str = "payload") -> None:
                 normalized = _normalized_field(key)
                 if (
                     normalized in _FORBIDDEN_PAYLOAD_FIELDS
-                    or normalized.replace("_", "")
-                    in _FORBIDDEN_PAYLOAD_FIELDS_COMPACT
+                    or normalized.replace("_", "") in _FORBIDDEN_PAYLOAD_FIELDS_COMPACT
                 ):
-                    raise Calibration002LearningError(
-                        f"{path} contains excluded field {key!r}"
-                    )
+                    raise Calibration002LearningError(f"{path} contains excluded field {key!r}")
             _reject_excluded_payload(item, path=f"{path}.{key}")
     elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         for index, item in enumerate(value):
@@ -142,9 +139,7 @@ def calibration_002_learning_plan(
 def _require_exact_plan(plan: AdaptiveCurriculumPlan) -> None:
     wall_clock_ms = tuple(stage.resource_budget.wall_clock_ms for stage in plan.stages)
     modes = tuple(stage.mode for stage in plan.stages)
-    if wall_clock_ms != tuple(
-        minutes * 60_000 for minutes in CALIBRATION_002_STAGE_MINUTES
-    ):
+    if wall_clock_ms != tuple(minutes * 60_000 for minutes in CALIBRATION_002_STAGE_MINUTES):
         raise Calibration002LearningError("campaign plan is not the fixed 30/60/90/300 plan")
     if modes != (
         CurriculumMode.BASELINE,
@@ -516,9 +511,7 @@ class Calibration002LearningSidecar:
             if not selected:
                 raise Calibration002LearningError("campaign ledger has no learning genesis")
             for index, envelope in enumerate(selected):
-                expected = (
-                    f"{campaign_id}.learning:{index:08d}:{envelope.kind}"
-                )
+                expected = f"{campaign_id}.learning:{index:08d}:{envelope.kind}"
                 if envelope.occurrence_id != expected:
                     raise Calibration002LearningError("campaign receipt sequence is invalid")
                 expected_parent = () if index == 0 else (selected[index - 1].receipt_id,)
@@ -595,9 +588,7 @@ class Calibration002LearningSidecar:
             raise
 
     @staticmethod
-    def _campaign_receipts(
-        ledger: SQLiteLedger, campaign_id: str
-    ) -> list[ReceiptEnvelope]:
+    def _campaign_receipts(ledger: SQLiteLedger, campaign_id: str) -> list[ReceiptEnvelope]:
         account_id = f"{campaign_id}.learning-campaign"
         prefix = f"{campaign_id}.learning:"
         return [
@@ -952,9 +943,7 @@ class Calibration002LearningSidecar:
             for envelope in self._ledger.receipts()
             if envelope.account_id == binding.account_id
             and envelope.account_version == 0
-            and envelope.occurrence_id.startswith(
-                f"{binding.frozen_stack.workspace_id}:"
-            )
+            and envelope.occurrence_id.startswith(f"{binding.frozen_stack.workspace_id}:")
         ]
         for envelope in selected:
             payload = self._ledger.get_payload(envelope.payload_hash)

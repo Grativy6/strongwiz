@@ -1,0 +1,32 @@
+{
+  "schema": "strongwiz.calibration-002-stage4-reassessment.v1",
+  "recommendation_id": "stage4-reassessment-001",
+  "recommendation_status": "recommended_not_approved",
+  "recommended_codebook_ref": "08fc1422b7a86a2e126681202a3394aa819daa171724bd22c0351ea0a2b90932",
+  "source_evidence_boundary_ref": "ab6cc0b8a631db5e6bc4ac13d0b113ae4c0b57af5c8d3aef75809f934941634c",
+  "disposition": "retain_blank_v0",
+  "stop_classification": "owner_requested_resource_pause_endpoint_closed",
+  "official_win_observed": false,
+  "last_official_state": "NOT_FINISHED",
+  "levels_completed": 1,
+  "win_levels": 7,
+  "last_environment_call": 77,
+  "non_reset_actions": 75,
+  "resets": 2,
+  "total_environment_calls": 77,
+  "elapsed_wall_ms": 1282077,
+  "hard_boundary_exhausted": false,
+  "known_residuals": [
+    "The accepted second-level socket contact history remains unresolved.",
+    "Six official levels remain incomplete.",
+    "The reset outcome at call 77 could not be assessed after the endpoint was closed.",
+    "No Kevin Speak shorthand earned promotion."
+  ],
+  "excluded_material": [
+    "frames",
+    "raw_traces",
+    "action_sequences",
+    "domain_state",
+    "private_reasoning"
+  ]
+}

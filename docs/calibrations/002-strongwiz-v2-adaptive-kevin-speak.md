@@ -1,5 +1,10 @@
 # Calibration 002 — Strongwiz v2 adaptive Kevin Speak campaign
 
+Final status: **PARTIAL**. The owner requested a resource pause during Stage 4.
+The final official state was `NOT_FINISHED` at 1 of 7 levels, and completion was
+not genuinely observed. See [`002-result.md`](002-result.md) and the public
+receipt set under [`receipts/002/`](receipts/002/).
+
 Calibration 002 is a non-contest, local-public calibration on the exact public
 `ls20-9607627b` artifact used by Calibration 001. Official
 `arcengine.GameState.WIN` is the sole completion authority.

@@ -226,6 +226,8 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Foundation verification receipt](docs/foundation-verification.md)
 - [ARC-AGI-3 Calibration 001 result](docs/calibrations/001-result.md) — bounded
   Codex-operated `PARTIAL`; official `GameState.WIN` was not observed
+- [ARC-AGI-3 Calibration 002 result](docs/calibrations/002-result.md) — adaptive
+  Strongwiz v2 campaign paused `PARTIAL`; Kevin Speak remained lossless but blank
 
 ## Stewardship, provenance, and license
 

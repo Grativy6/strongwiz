@@ -270,15 +270,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         rationale = payload.pop("rationale", None)
         evaluation_id = payload.pop("evaluation_id", None)
-        retired_tokens = _string_tuple(
-            payload.pop("retired_tokens", []), "retired_tokens"
-        )
+        retired_tokens = _string_tuple(payload.pop("retired_tokens", []), "retired_tokens")
         model_proposal_ref = payload.pop("model_proposal_ref", None)
-        if (
-            not isinstance(rationale, str)
-            or not isinstance(evaluation_id, str)
-            or payload
-        ):
+        if not isinstance(rationale, str) or not isinstance(evaluation_id, str) or payload:
             raise ValueError("learn-adapt has missing or unexpected fields")
         with Calibration002LearningSidecar.restore(args.ledger) as learning:
             result = learning.adapt(
@@ -296,17 +290,9 @@ def main(argv: list[str] | None = None) -> int:
         payload = _load_object(repository_root, args.input)
         recommendation_id = payload.pop("recommendation_id", None)
         rationale = payload.pop("rationale", None)
-        evaluation_refs = _string_tuple(
-            payload.pop("evaluation_refs", []), "evaluation_refs"
-        )
-        known_residuals = _string_tuple(
-            payload.pop("known_residuals", []), "known_residuals"
-        )
-        if (
-            not isinstance(recommendation_id, str)
-            or not isinstance(rationale, str)
-            or payload
-        ):
+        evaluation_refs = _string_tuple(payload.pop("evaluation_refs", []), "evaluation_refs")
+        known_residuals = _string_tuple(payload.pop("known_residuals", []), "known_residuals")
+        if not isinstance(recommendation_id, str) or not isinstance(rationale, str) or payload:
             raise ValueError("learn-recommend has missing or unexpected fields")
         with Calibration002LearningSidecar.restore(args.ledger) as learning:
             result = learning.recommend(

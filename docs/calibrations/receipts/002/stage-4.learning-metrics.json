@@ -1,0 +1,27 @@
+{
+  "schema": "strongwiz.calibration-002-stage4-learning-metrics.v1",
+  "workspace_id": "calibration-002.s4.calibration-002-stage-4.kevin",
+  "codebook_version": 0,
+  "active_codebook_ref": "08fc1422b7a86a2e126681202a3394aa819daa171724bd22c0351ea0a2b90932",
+  "active_translation_count": 0,
+  "run_local_entry_count": 3,
+  "residual_entry_count": 3,
+  "compact_entry_count": 0,
+  "evaluation_count": 0,
+  "adaptation_attempt_count": 0,
+  "promoted_symbol_count": 0,
+  "source_bytes": 875,
+  "representation_bytes": 875,
+  "exact_round_trips": true,
+  "workspace_receipt_count": 5,
+  "workspace_receipt_head": "7c14763a34268fd5c3c9c5db557f78963a92b3ac0e8d278652d3cc73e9849d78",
+  "campaign_ledger_receipt_count": 34,
+  "campaign_ledger_receipt_head": "e261f5e3599c08155663a82b7bc7c1e1192def1c513ee3ac0923ea3391650f4e",
+  "recommendation_id": "stage4-reassessment-001",
+  "recommendation_status": "recommended_not_approved",
+  "entry_source_refs": {
+    "stage4-level1-intervening-white": "e0127d9c4430184b9b429c9fb188eaeff8a438a5023f6b410462f10aca95cb38",
+    "stage4-yellow-refill-confirmed": "b798684c87cbbf20452274cfe9eb184f5aacfb57cc8e05de428ff6fdbc8e54e5",
+    "stage4-level2-lower-white-upper-rejected": "f6d2c115079bb2121fb3b5340a33cfd9fc4387a20bf75cc5b7a43532e47c398a"
+  }
+}
