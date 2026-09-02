@@ -1,0 +1,89 @@
+{
+  "schema": "strongwiz.arc-agi3-calibration-public-artifact-index.v1",
+  "calibration_id": "001",
+  "game_id": "ls20-9607627b",
+  "result": {
+    "best_levels_completed": 4,
+    "completion_genuinely_observed": false,
+    "disposition": "partial",
+    "final_state": "NOT_FINISHED",
+    "win_levels": 7
+  },
+  "tracked_exact_copies": [
+    {
+      "path": "attempt-001.capsule-manifest.json",
+      "sha256": "0895b09305acc70c5109131612fb394f5faba22a2744ba050872a3a8a087f21c",
+      "size_bytes": 11042
+    },
+    {
+      "path": "attempt-001.delivery-receipt.json",
+      "sha256": "6cd01e08d1637b49412a7d394e6e3ff74046d188388b8c162908072e7955bdbd",
+      "size_bytes": 4115
+    },
+    {
+      "path": "attempt-001.run-seal.json",
+      "sha256": "13ee0ad977d08fb448a777345affe650e156ee3fad8a6bd5b71156774e3d1fe4",
+      "size_bytes": 9955
+    },
+    {
+      "path": "attempt-001.terminal-record.json",
+      "sha256": "5153cb92e46cd844b8016efac24a42881f708347d5d80bbf3b19327cc1ddff78",
+      "size_bytes": 3036
+    },
+    {
+      "path": "attempt-002.capsule-manifest.json",
+      "sha256": "803a01fd841271e31983326380e65592a0f5235e5ba681670a522c33ad8814b7",
+      "size_bytes": 884532
+    },
+    {
+      "path": "attempt-002.delivery-receipt.json",
+      "sha256": "0c5b454828b6bb9cadd5707cd2278698e12aec87d0d693657e128f20ffc17601",
+      "size_bytes": 4659
+    },
+    {
+      "path": "attempt-002.run-seal.json",
+      "sha256": "d944c57f38f63d11bea711928498fda63c03b72f127ef0390d75059304d201d4",
+      "size_bytes": 883423
+    },
+    {
+      "path": "attempt-002.terminal-record.json",
+      "sha256": "347cd7a04f1bd3e5b79a2de69076b1eb4f84eebb102e07ac79551f7b1fcf7f41",
+      "size_bytes": 3541
+    }
+  ],
+  "derived_public_receipts": [
+    {
+      "path": "postrun-finalization.receipt.json",
+      "sha256": "6581f444b7e6492bf2d894196eae8346a23d68fca066afe10e4a5b8b837525b2",
+      "size_bytes": 2367
+    }
+  ],
+  "retained_local_only": {
+    "attempt_001_ledger": {
+      "sha256": "1908d8940fa3989d7d98de5e4acbcf55afc53516ffbff7c7d956bed5ca58389b",
+      "size_bytes": 819200
+    },
+    "attempt_002_ledger": {
+      "sha256": "8345a6e66dbf1b45eacd1687390e39f6bdddc8701ec3129d6901e850d788dedd",
+      "size_bytes": 3855728640
+    },
+    "attempt_002_official_recording": {
+      "sha256": "0fc9fb0065c2cc0c9c250755190f638167363d1b149ef0adfe1d79347bac9cb8",
+      "size_bytes": 20316547
+    },
+    "attempt_002_raw_trace": {
+      "sha256": "fd8092b8b98450c57af78019efc9aede63897a40f794855964a6d2d642d31e43",
+      "size_bytes": 330298
+    },
+    "note": "Hashes identify retained local bytes; contents are intentionally absent from Git and were not publication-reviewed."
+  },
+  "postrun_verifier": {
+    "source_path": "scripts/strongwiz_streaming_postrun.py",
+    "source_sha256": "4c00f2ea221c6ff63ddd288d31389878f93b889052310dec261ca8c0a717bc0f",
+    "source_size_bytes": 87411,
+    "test_path": "tests/test_streaming_postrun.py",
+    "test_sha256": "3177a98b97ba67cfa2c6ea22ef4849963b1ba69ff1a202fc7efcab47e95677e0",
+    "test_size_bytes": 40474
+  },
+  "publication_boundary": "Exact metadata and control receipts are tracked. The complete replay/evidence specimen remains local and content-addressed; this Git set alone cannot replay or independently inspect omitted raw evidence."
+}
