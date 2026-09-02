@@ -25,6 +25,34 @@ source repository's copyright or license.
 Commit identifiers are the evidence boundary. Later changes in those
 repositories do not silently alter this notice.
 
+## Calibration 001 execution boundary
+
+Calibration 001 distinguishes code actually imported or executed from
+conceptual influence and structural correspondence.
+
+| Component | Bound identity | Treatment in Calibration 001 |
+| --- | --- | --- |
+| Frozen Strongwiz toolbelt | commit `a85508dc11cc6ac30336f5c42344b62afdc86b24`; tree `9e58cb361919fca3638b1f76a00379740c4e4aa4` | First-party Strongwiz code actually executed. The two run-local integrations were separately bound by content refs; they did not mutate the frozen toolbelt. |
+| Python interpreter | Python 3.12 | Executed runtime. Only the major/minor identity was frozen; no interpreter source or binary is redistributed here. Upstream terms remain applicable. |
+| ARC-AGI toolkit | `arc-agi==0.9.9` | Third-party package imported and executed to acquire the authorized local-public artifact and construct the official environment. No package source, wheel, game source, or artifact is vendored in this repository. |
+| ARC engine | `arcengine==0.9.3` | Third-party package imported and executed; its `GameState` enum, projected through the frozen adapter, supplied terminal-state authority. No package source or binary is vendored here. |
+| Context-isolated Codex selector | external process; hosted weights not bound | Operated the run-local proposal and assessment interface. It is not a bundled dependency or a reproduced model artifact, and no autonomous-offline claim is made. |
+| Streaming post-run verifier | source SHA-256 `4c00f2ea221c6ff63ddd288d31389878f93b889052310dec261ca8c0a717bc0f` | New first-party Strongwiz code added and executed only after gameplay closed. It finalized and verified the evidence package; it did not select actions or contribute to the run outcome. |
+
+The exact run-specific bindings and receipts are in
+[`docs/calibrations/001-result.md`](docs/calibrations/001-result.md) and
+[`docs/calibrations/receipts/001/`](docs/calibrations/receipts/001/).
+The upstream runtime packages were obtained separately and retain their own
+terms. This notice does not assert a license beyond what the corresponding
+upstream distribution supplies.
+
+No FBT, A0BK, Prime Axiom, Little Scientist, Model Scientist, or Wise Scientist
+repository code or weights were imported or executed in Calibration 001.
+Their entries below remain conceptual provenance only. Similar structure is not
+evidence of code transfer, independent corroboration, or causation, and the
+calibration does not support a claim that FBT caused any observed ARC behavior
+or efficiency.
+
 ## Owner-supplied formal source stack
 
 The following works by Christopher D. Pang were inspected as conceptual design

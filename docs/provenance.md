@@ -82,6 +82,67 @@ that a public-game win establishes hidden-game generalization. The Wise
 Scientist action selector was external to the frozen harness, so its run is not
 retroactively described as a packaged autonomous offline agent.
 
+### Strongwiz Calibration 001 — execution provenance
+
+Calibration 001 is a first-party Strongwiz execution record, not another source
+lineage. Its reviewable result and publication-safe receipt index are
+[`docs/calibrations/001-result.md`](calibrations/001-result.md) and
+[`docs/calibrations/receipts/001/artifact-index.json`](calibrations/receipts/001/artifact-index.json).
+
+**Code and runtime actually used.** Both attempts bound the frozen Strongwiz
+toolbelt to commit `a85508dc11cc6ac30336f5c42344b62afdc86b24` and tree
+`9e58cb361919fca3638b1f76a00379740c4e4aa4`. The run-local integrations
+remained separate from that toolbelt: attempt 001 bound integration ref
+`182a00f17e4295d97de980e0bcb6eee8fada7717afcb183ca023ce87a1579139`;
+attempt 002, after the numbered-successor repair, bound
+`fafd0b6d97489077155cfc1c7a07d3dd60ff9cb196d01147a25ded705ae2ceb0`.
+The execution environment used Python 3.12, `arc-agi==0.9.9`, and
+`arcengine==0.9.3`. A new context-isolated Codex process operated the
+proposal/assessment interface; its hosted weights were not bound or packaged,
+and the parent process was barred from action recommendations.
+
+**Count and replay semantics.** A non-reset action is an admitted official
+environment call whose action name is not `RESET`. The reset count includes
+the implicit initial reset performed by `Arcade.make` plus later admitted
+`RESET` calls. Total official environment calls are the sum of those two
+classes. A known budget denial before Strongwiz admission counts as neither an
+action nor a reset and has no charged environment effect. An uncertain external
+effect is never silently retried. “Replay guarded” refers to duplicate control
+message identities and proposal attempts: successors are numbered, cannot be
+skipped or replayed, and an admitted proposal cannot be replaced. It is not a
+claim that the public Git set can replay the gameplay. Raw frames, traces,
+recordings, ledgers, and the complete capsules remain local, so the public set
+can verify the published bindings but cannot independently inspect or replay
+the omitted evidence.
+
+**Terminal result.** Attempt `calibration-001-ls20-seed0` ended
+`PARTIAL / NOT_FINISHED` at 0 of 7 levels after 6 non-reset actions and 1
+reset (7 official calls). Attempt
+`calibration-001-ls20-seed0-attempt-002` ended
+`PARTIAL / NOT_FINISHED` at 4 of 7 levels after 754 non-reset actions and 4
+resets (758 official calls). Both bound game `ls20-9607627b`; neither
+genuinely observed `GameState.WIN`.
+
+The attempt-002 terminal record, run seal, capsule manifest, and external
+delivery receipt have SHA-256 identities
+`347cd7a04f1bd3e5b79a2de69076b1eb4f84eebb102e07ac79551f7b1fcf7f41`,
+`d944c57f38f63d11bea711928498fda63c03b72f127ef0390d75059304d201d4`,
+`803a01fd841271e31983326380e65592a0f5235e5ba681670a522c33ad8814b7`,
+and
+`0c5b454828b6bb9cadd5707cd2278698e12aec87d0d693657e128f20ffc17601`,
+respectively. Independent published-capsule readback passed against the same
+capsule identity.
+
+The bounded-memory verifier at
+`scripts/strongwiz_streaming_postrun.py` was first-party code added only after
+gameplay had closed; its pre-execution source SHA-256 is
+`4c00f2ea221c6ff63ddd288d31389878f93b889052310dec261ca8c0a717bc0f`.
+It finalized and checked retained evidence but did not select actions, alter the
+frozen toolbelt, or contribute to the completed run. Likewise, no FBT code or
+weights were imported or executed. Structural correspondence to FBT-informed
+design ideas remains conceptual provenance and does not support a causal FBT
+claim about the observed result.
+
 ### FBT experimental lineage
 
 Inspected source:

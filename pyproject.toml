@@ -21,6 +21,10 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+calibration = [
+  "arc-agi==0.9.9",
+  "arcengine==0.9.3",
+]
 dev = [
   "build>=1.3,<2",
   "mypy>=1.17,<2",
@@ -59,7 +63,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src/strongwiz"]
+files = ["src/strongwiz", "calibration"]
 plugins = ["pydantic.mypy"]
 
 [tool.coverage.run]

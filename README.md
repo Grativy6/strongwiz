@@ -201,6 +201,8 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [v0.2 release gate](docs/release-v0.2.md)
 - [v0.2 verification and evidence](docs/v0.2-verification.md)
 - [Foundation verification receipt](docs/foundation-verification.md)
+- [ARC-AGI-3 Calibration 001 result](docs/calibrations/001-result.md) — bounded
+  Codex-operated `PARTIAL`; official `GameState.WIN` was not observed
 
 ## Stewardship, provenance, and license
 

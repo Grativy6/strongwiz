@@ -1,0 +1,47 @@
+{
+  "schema": "strongwiz.arc-agi3-postrun-finalization-receipt.v1",
+  "calibration_id": "001",
+  "legacy_attempt": {
+    "entry_point": "python -m calibration seal",
+    "result": "operator_stopped_resource_risk",
+    "elapsed_seconds_lower_bound": 3600,
+    "sampled_private_memory_gib_approx": 18,
+    "sampled_page_faults_lower_bound": 58000000,
+    "host_physical_memory_gib": 16,
+    "environment_calls": 0,
+    "run_seal_published": false,
+    "source_terminal_and_ledger_unchanged_after_stop": true,
+    "measurement_note": "Approximate sparse operator telemetry; not an instrumented benchmark."
+  },
+  "streaming_finalization": {
+    "entry_point": "scripts/strongwiz_streaming_postrun.py",
+    "started_at": "2026-09-02T01:37:57.7897050-04:00",
+    "delivery_receipt_written_at": "2026-09-02T03:51:32.7406433-04:00",
+    "elapsed_seconds": 8014.951,
+    "exit_code": 0,
+    "sampled_max_private_memory_mib_approx": 142.0,
+    "sampled_read_transfer_gib_lower_bound": 34.58,
+    "sampled_write_transfer_bytes": 3922125972,
+    "measurement_note": "Sparse process telemetry; maxima and transfer counts are sampled, not instrumented peaks or semantic algorithmic byte counts.",
+    "run_seal_ref": "d944c57f38f63d11bea711928498fda63c03b72f127ef0390d75059304d201d4",
+    "evidence_capsule_ref": "803a01fd841271e31983326380e65592a0f5235e5ba681670a522c33ad8814b7",
+    "delivery_receipt_sha256": "0c5b454828b6bb9cadd5707cd2278698e12aec87d0d693657e128f20ffc17601",
+    "source_ledger_sha256": "8345a6e66dbf1b45eacd1687390e39f6bdddc8701ec3129d6901e850d788dedd",
+    "internal_staged_and_published_capsule_verification": true
+  },
+  "independent_published_capsule_verification": {
+    "status": "pass",
+    "exit_code": 0,
+    "expected_capsule_ref": "803a01fd841271e31983326380e65592a0f5235e5ba681670a522c33ad8814b7",
+    "observed_capsule_ref": "803a01fd841271e31983326380e65592a0f5235e5ba681670a522c33ad8814b7",
+    "verifier_elapsed_seconds": 2546.814,
+    "total_elapsed_seconds_with_cleanup_checks": 2546.965,
+    "peak_working_set_mib": 147.1,
+    "sampled_peak_private_memory_mib": 134.9,
+    "receipt_pointer_hash_size_and_canonical_checks": true,
+    "capsule_run_seal_and_terminal_ref_checks": true,
+    "stale_finalizer_index_staging_or_temp_paths": false,
+    "source_ledger_wal_shm_or_journal": false,
+    "raw_gameplay_evidence_inspected": false
+  }
+}
