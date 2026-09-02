@@ -10,10 +10,10 @@ identity of the work.
 The project is general-purpose. ARC-AGI-3 is one development adapter and source
 of hard-won machinery; it is not the kernel's definition.
 
-> Status: `0.3.0.dev0`, development build. The typed kernel, lab-genesis
+> Status: `0.4.0.dev0`, development build. The typed kernel, lab-genesis
 > commands, local model adapters, resumable sessions, and sealed evidence
-> capsules are runnable. Kevin Speak and its adaptive curriculum are
-> experimental and disabled by default. No `v0.3.0` release has been published.
+> capsules are runnable. Kevin Speak, the representation-only scribe, and the
+> adaptive curriculum are experimental. No `v0.4.0` release has been published.
 > This is not an ARC Prize submission or evidence of general intelligence.
 
 ## The declared boundary
@@ -98,10 +98,17 @@ requires the exact completed execution evidence.
 - blank, model-authored Kevin Speak codebooks with a fixed decoder, exact
   round trips, uncompressed residuals, multi-case promotion gates, and
   recommendation -> review/refinement -> scoped adoption -> transfer receipts;
+- a dedicated representation-only scribe with a separate driver identity,
+  receipt-bound derived inputs, adaptation/held-out validation separation,
+  typed failure fallback, and restart-safe semantic cycle identities;
+- a targeted PAL v2.3 adapter for role-typed boundaries, explicit state
+  projections, immutable grant epochs, checkpoint freeze/thaw, heartbeat
+  stutter, and re-entry receipts, without claiming package-wide conformance;
 - an event-driven steering heartbeat that suppresses unchanged timer-like pings;
 - a 30/60/90/final adaptive curriculum with one separately sealed run per stage
   and explicit learned-stack inheritance;
-- an exact six-paper and PEA/PECAN/SEED source-identity registry;
+- an exact fourteen-source registry covering eleven named papers/framework
+  faces plus PEA/PECAN/SEED;
 - a deliberately narrow ARC-AGI-3 terminal-authority adapter with no game IDs,
   policies, or action scripts.
 
@@ -160,6 +167,8 @@ strongwiz kevin schema
 strongwiz kevin init path/to/kevin.sqlite3 --workspace-id my-run
 strongwiz kevin verify path/to/kevin.sqlite3 --workspace-id my-run
 strongwiz kevin table path/to/kevin.sqlite3 --workspace-id my-run
+strongwiz pal23 schema
+strongwiz scribe schema
 ```
 
 Create and verify a genuinely empty laboratory from predeclared manifests,
@@ -216,6 +225,8 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Lab genesis and sealed runs](docs/lab-genesis.md)
 - [Just-add-model guide](docs/just-add-model.md)
 - [Kevin Speak](docs/kevin-speak.md)
+- [Representation scribe](docs/scribe.md)
+- [Targeted PAL v2.3 profile](docs/pal-v2.3-profile.md)
 - [Adaptive calibration campaigns](docs/adaptive-calibration.md)
 - [v0.3 development verification](docs/v0.3-development-verification.md)
 - [Retention ablations](docs/retention-ablation.md)
@@ -228,6 +239,8 @@ These are bounded software interfaces, not legal or ethical authorities. See
   Codex-operated `PARTIAL`; official `GameState.WIN` was not observed
 - [ARC-AGI-3 Calibration 002 result](docs/calibrations/002-result.md) — adaptive
   Strongwiz v2 campaign paused `PARTIAL`; Kevin Speak remained lossless but blank
+- [ARC-AGI-3 Calibration 003 preparation](docs/calibrations/003-strongwiz-v3-pal23-scribe.md)
+  — matched v3 design prepared; no ARC environment interaction yet
 
 ## Stewardship, provenance, and license
 

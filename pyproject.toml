@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "strongwiz"
-version = "0.3.0.dev0"
+version = "0.4.0.dev0"
 description = "A model-neutral laboratory for evidence-bounded reasoning"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -63,7 +63,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src/strongwiz", "calibration"]
+files = ["src/strongwiz", "calibration", "calibration_003"]
 plugins = ["pydantic.mypy"]
 
 [tool.coverage.run]

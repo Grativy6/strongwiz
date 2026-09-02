@@ -75,7 +75,7 @@ def test_cli_initializes_and_verifies_a_genesis_lab(tmp_path: Path, capsys: obje
 def test_cli_verifies_declared_source_registry(capsys: object) -> None:
     assert main(["verify-sources", "docs/source-identities.json"]) == 0
     output = capsys.readouterr().out  # type: ignore[attr-defined]
-    assert '"source_count":9' in output
+    assert '"source_count":14' in output
     assert '"valid":true' in output
 
 
@@ -102,6 +102,18 @@ def test_cli_initializes_and_audits_blank_kevin_workspace(
     assert main(["kevin", "table", *base]) == 0
     table_output = capsys.readouterr().out  # type: ignore[attr-defined]
     assert '"translations":[]' in table_output
+
+
+def test_cli_prints_pal23_and_scribe_schema_claim_ceilings(capsys: object) -> None:
+    assert main(["pal23", "schema"]) == 0
+    pal_output = capsys.readouterr().out  # type: ignore[attr-defined]
+    assert '"schema":"strongwiz.pal23-adapter.v1"' in pal_output
+    assert "not package-wide PAL conformance" in pal_output
+
+    assert main(["scribe", "schema"]) == 0
+    scribe_output = capsys.readouterr().out  # type: ignore[attr-defined]
+    assert '"schema":"strongwiz.scribe.v1"' in scribe_output
+    assert "representation-only recommendations" in scribe_output
 
 
 def test_cli_seals_packs_and_verifies_a_partial_run(tmp_path: Path, capsys: object) -> None:

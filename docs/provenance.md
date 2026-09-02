@@ -22,12 +22,38 @@ stewardship across projects is provenance, not independent corroboration.
 ## Source ledger
 
 The machine-checked registry is
-[`docs/source-identities.json`](source-identities.json). It binds six paper
-artifacts by persistent identifier and inspected local SHA-256, plus the exact
-PEA Core v1.1.3, PECAN v1.0.4, and SEED v0.3 policy identities. The registry
-digest can be frozen into each new `LabManifest`.
+[`docs/source-identities.json`](source-identities.json). It binds eleven paper
+artifacts by persistent identifier and local SHA-256, plus the exact PEA Core
+v1.1.3, PECAN v1.0.4, and SEED v0.3 policy identities. The registry digest can
+be frozen into each new `LabManifest`.
 
-### Formal paper source stack
+### PAL v2.3 coordinated source stack
+
+The owner supplied five frozen DOCX authority faces from the author release
+[PAL v2.3 — Primitive Axiom Layers](https://doi.org/10.5281/zenodo.22240134).
+All five identify Christopher D. Pang as author and steward, publication date
+`2026-09-02`, and CC BY 4.0 as their license. The common DOI identifies the
+coordinated release; the component title, version line, and SHA-256 distinguish
+each face.
+
+| Face | Version | Frozen DOCX SHA-256 | Bounded source role |
+| --- | --- | --- | --- |
+| Mechanical Structural Spine | `2.3` | `e9517b17278b72995f22469d825a62ad9a47d3a151089684f3d4c3ef96e4e9a2` | Mechanical semantics and invariant vocabulary; no external authority or automatic Strongwiz conformance. |
+| Mathematical Realization Atlas | `2.3-M` | `c053292376363edd6fc743f0f2e31e3bb3850edc78ade3a289bbb07e7e8452c5` | Scoped realization maps, boundary adapters, and fixtures; it does not amend the spine or establish universal or empirical results. |
+| Obligation and Decision Ledger | `2.3-L` | `694449304139c642c5112f9e41f3b41848a652fc7d12b9a60450bf5e776f704b` | Decisions, obligations, residuals, and reopening handles; recording a status does not manufacture closure or authority. |
+| Conformance Tests | `2.3-T` | `bf79d3a76ef71d6946704be551488bdfe2c062231f4a0c1a85bb51b203fe4b89` | Test specifications, fixtures, and falsifiers; bounded test success is neither complete conformance nor independent validation. |
+| Compatibility Note | `2.3-C` | `57bd5432c6a0a4474c781f918e60e1fcf3f1b80119bfdc317bf6c17bbbc80f07` | Migration mapping and non-retrofit constraints; it cannot redefine another face or close its burdens. |
+
+PAL v1 and v2 source history remains evidence under its recorded identity.
+This registration treats PAL v2.3 only as a prospective `SUCCESSOR` input for
+new Strongwiz records that bind the updated registry. It does not retrofit
+earlier records or registry digests, infer v2.3 fields backward, or assert a
+PAL-native `VERSION` transition. No full PAL v2.3 conformance claim is made for
+Strongwiz. The five documents are sources, not executable repository
+instructions, and their shared author lineage is not independent
+corroboration.
+
+### Earlier formal paper source stack
 
 - **Golden Phase Prime Ribbons v0.1** —
   [Zenodo 22225414](https://doi.org/10.5281/zenodo.22225414). Used only as an

@@ -91,6 +91,14 @@ The remaining modules are replaceable reasoning services:
   seals, complete evidence capsules, and non-adopting promotion receipts;
 - `shorthand` supplies the experimental Kevin Speak representation ledger,
   exact residual fallback, and sealed successor recommendation/adoption path;
+- `scribe` supplies a separately identified representation-only provider and
+  coordinator. Its request view contains receipt-bound derived adaptation
+  summaries and omits held-out validation payloads, actions, domain state,
+  private reasoning, and authority. The in-process callable adapter is trusted
+  application code, not a confidentiality sandbox;
+- `pal23` supplies a targeted prospective adapter for role-typed boundaries,
+  explicit work projections, immutable grant epochs, checkpoint freeze/thaw,
+  heartbeat stutter, and re-entry. It is not a package-wide conformance claim;
 - `curriculum` supplies sequential bounded campaigns with explicit learned-state
   transfers, while `heartbeat` supplies event-driven steering projections;
 - `features` keeps experimental capabilities replaceable and inert by default;
@@ -159,3 +167,18 @@ state, hidden reasoning, or authority.
 Provider packages are drivers, domain packages are adapters, and Hearthline or
 another configured product may compose them as a distribution. None of those
 identities belongs in the kernel contract.
+
+The v3 calibration design strengthens this boundary further: every comparison
+arm has a physically separate absent-or-empty lab root and SQLite ledger. A
+campaign index outside those roots may bind only plans, identities, checkpoints,
+and seals. Same-game carry evidence crosses only through a reviewed,
+target-bound packet and changes the claim class to adaptive successor.
+
+The scribe shares the run's serial evidence writer but uses its own account and
+driver identity. Its only productive coordinate is the representation state.
+An earned codebook promotion is not an environment action or evidence of task
+progress. Validation material is omitted from the declared request view until
+the proposal draft is frozen; provider failure preserves the pending entries
+and their exact decodability in whichever compact-or-residual lanes ingestion
+already selected. A separate-process capability boundary is required if the
+provider itself is not trusted application code.

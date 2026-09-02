@@ -55,8 +55,31 @@ or efficiency.
 
 ## Owner-supplied formal source stack
 
-The following works by Christopher D. Pang were inspected as conceptual design
-sources. Their exact local artifact hashes and persistent identifiers are in
+The coordinated
+[PAL v2.3 — Primitive Axiom Layers](https://doi.org/10.5281/zenodo.22240134)
+author release supplies five distinct authority faces. Each face identifies
+Christopher D. Pang as author and steward, `2026-09-02` as its publication
+date, and CC BY 4.0 as its license. Strongwiz records the following exact DOCX
+identities without redistributing their text, figures, or equations.
+
+| PAL v2.3 face | Version | Frozen DOCX SHA-256 | Bounded use in Strongwiz |
+| --- | --- | --- | --- |
+| Mechanical Structural Spine | `2.3` | `e9517b17278b72995f22469d825a62ad9a47d3a151089684f3d4c3ef96e4e9a2` | Prospective mechanical semantics and invariant vocabulary; no external authority or automatic Strongwiz conformance. |
+| Mathematical Realization Atlas | `2.3-M` | `c053292376363edd6fc743f0f2e31e3bb3850edc78ade3a289bbb07e7e8452c5` | Prospective scoped realization maps, boundary adapters, and fixtures; no spine amendment or universal result. |
+| Obligation and Decision Ledger | `2.3-L` | `694449304139c642c5112f9e41f3b41848a652fc7d12b9a60450bf5e776f704b` | Prospective decision, obligation, residual, and reopening evidence; no manufactured closure or authority. |
+| Conformance Tests | `2.3-T` | `bf79d3a76ef71d6946704be551488bdfe2c062231f4a0c1a85bb51b203fe4b89` | Prospective specifications, fixtures, and falsifiers; bounded passing checks are not independent validation. |
+| Compatibility Note | `2.3-C` | `57bd5432c6a0a4474c781f918e60e1fcf3f1b80119bfdc317bf6c17bbbc80f07` | Prospective migration and non-retrofit guidance; it cannot redefine another authority face. |
+
+PAL v1 and v2 provenance remains attached to its original versions and
+receipts. Strongwiz registers PAL v2.3 only as a prospective `SUCCESSOR` source
+for new records that bind the updated registry; it asserts neither a
+PAL-native `VERSION` transition nor full PAL v2.3 conformance. The source text
+is evidence, not repository authorization, and the common authorship does not
+make the five faces independent corroborations.
+
+The following earlier works by Christopher D. Pang were inspected as
+conceptual design sources. Their exact local artifact hashes and persistent
+identifiers are in
 [`docs/source-identities.json`](docs/source-identities.json). No paper text,
 figures, or equations are redistributed by Strongwiz, and a shared
 author/steward does not make these independent corroborations.
