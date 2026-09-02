@@ -229,6 +229,7 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Targeted PAL v2.3 profile](docs/pal-v2.3-profile.md)
 - [Adaptive calibration campaigns](docs/adaptive-calibration.md)
 - [v0.3 development verification](docs/v0.3-development-verification.md)
+- [v0.4 development verification](docs/v0.4-development-verification.md)
 - [Retention ablations](docs/retention-ablation.md)
 - [Claim boundary](docs/claim-boundary.md)
 - [Provenance](docs/provenance.md)
