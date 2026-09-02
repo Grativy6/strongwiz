@@ -1,3 +1,4 @@
-# Receipt and capsule hashes bind exact bytes; never rewrite their line endings.
+# Receipt, capsule, and calibration-evidence hashes bind exact bytes; never
+# rewrite their line endings during a platform-specific checkout.
 docs/receipts/** -text
-docs/calibrations/receipts/** -text
+docs/calibrations/** -text
