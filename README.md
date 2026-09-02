@@ -217,6 +217,7 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Just-add-model guide](docs/just-add-model.md)
 - [Kevin Speak](docs/kevin-speak.md)
 - [Adaptive calibration campaigns](docs/adaptive-calibration.md)
+- [v0.3 development verification](docs/v0.3-development-verification.md)
 - [Retention ablations](docs/retention-ablation.md)
 - [Claim boundary](docs/claim-boundary.md)
 - [Provenance](docs/provenance.md)
