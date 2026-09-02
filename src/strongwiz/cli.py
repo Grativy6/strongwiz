@@ -26,8 +26,10 @@ from strongwiz.lab import (
     verify_lab,
 )
 from strongwiz.ledger import SQLiteLedger
+from strongwiz.pal23 import pal23_schema_bundle
 from strongwiz.provenance import load_source_registry
 from strongwiz.routing import evaluate_proposal
+from strongwiz.scribe import scribe_schema_bundle
 from strongwiz.shorthand import KevinSpeakWorkspace, kevin_speak_schema_bundle
 
 
@@ -89,6 +91,22 @@ def _parser() -> argparse.ArgumentParser:
     kevin_table.add_argument("--account-id")
     kevin_table.add_argument("--account-version", type=int, default=0)
     kevin_table.set_defaults(handler=_kevin_table)
+
+    pal23 = subcommands.add_parser("pal23", help="inspect the bounded PAL v2.3 adapter surface")
+    pal23_commands = pal23.add_subparsers(dest="pal23_command", required=True)
+    pal23_schema = pal23_commands.add_parser(
+        "schema", help="print the targeted PAL v2.3 adapter schemas"
+    )
+    pal23_schema.set_defaults(handler=_pal23_schema)
+
+    scribe = subcommands.add_parser(
+        "scribe", help="inspect the representation-only scribe boundary"
+    )
+    scribe_commands = scribe.add_subparsers(dest="scribe_command", required=True)
+    scribe_schema = scribe_commands.add_parser(
+        "schema", help="print the representation-only scribe schemas"
+    )
+    scribe_schema.set_defaults(handler=_scribe_schema)
 
     lab = subcommands.add_parser("lab", help="create and audit sealed laboratories")
     lab_commands = lab.add_subparsers(dest="lab_command", required=True)
@@ -254,6 +272,16 @@ def _kevin_init(args: argparse.Namespace) -> int:
 
 def _kevin_schema(_args: argparse.Namespace) -> int:
     print(canonical_text(kevin_speak_schema_bundle()))
+    return 0
+
+
+def _pal23_schema(_args: argparse.Namespace) -> int:
+    print(canonical_text(pal23_schema_bundle()))
+    return 0
+
+
+def _scribe_schema(_args: argparse.Namespace) -> int:
+    print(canonical_text(scribe_schema_bundle()))
     return 0
 
 

@@ -8,6 +8,26 @@ permissions:
   contents: read
 
 jobs:
+  core-v3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install core only
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.lock.txt
+          python -m pip install --no-deps -e .
+      - name: Verify PAL v2.3, scribe, and preparation-only campaign
+        run: >-
+          python -m pytest
+          tests/test_pal23.py
+          tests/test_scribe.py
+          tests/test_calibration_003.py
+
   test:
     strategy:
       fail-fast: false
@@ -32,7 +52,7 @@ jobs:
       - name: Lint
         run: python -m ruff check .
       - name: Type check
-        run: python -m mypy src/strongwiz
+        run: python -m mypy
       - name: Tests
         run: python -m pytest --cov=strongwiz --cov-report=term-missing
       - name: Source identity registry

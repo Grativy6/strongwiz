@@ -1,0 +1,257 @@
+{
+  "schema": "strongwiz.calibration-003-v2-carry-packet.v1",
+  "packet_id": "calibration-003-v2-public-reanalysis-001",
+  "classification": "same-game adaptive-successor evidence",
+  "claim_ceiling": "concise reanalysis of one public-game campaign; not fresh, unseen, independent, causal, or generalization evidence",
+  "source_campaign": {
+    "campaign_id": "calibration-002-strongwiz-v2-adaptive-kevin-speak",
+    "game_id": "ls20-9607627b",
+    "toolbelt_commit": "1e6c2478cbb4f4168d8ec8857b65b88af1fd499a",
+    "toolbelt_tree": "83172b2de0712af0e591486ff3e6d0550cea5691"
+  },
+  "source_artifacts": [
+    {
+      "path": "docs/calibrations/002-result.md",
+      "sha256": "404aab6e7134e94cb226efa6d1b43dcd6ef40587a2c3d24f98b11dab07803b8a"
+    },
+    {
+      "path": "docs/calibrations/receipts/002/campaign-summary.json",
+      "sha256": "7f9fc3acf5c61579b2262b0edfc2b1e0eb306d2ed4feee7e1244acf93e657de5"
+    },
+    {
+      "path": "docs/calibrations/receipts/002/stage-1-to-2.transition-manifest.json",
+      "sha256": "df2ec2dddd0ce2383ce08c799ac4a089914e0fc1655a8d9ce8faa251a6531038"
+    },
+    {
+      "path": "docs/calibrations/receipts/002/stage-3-to-4.transition-manifest.json",
+      "sha256": "66de57d5ea94847804f7ef39ae919ec8a835ca394d04ae452809c4b0deeaa276"
+    },
+    {
+      "path": "docs/calibrations/receipts/002/stage-4.final-handoff.json",
+      "sha256": "97bc8535e29c355cd66d3458134d2533661c02067149cb783d6ce285632b0991"
+    },
+    {
+      "path": "docs/calibrations/receipts/002/stage-4.transferable-mechanics.json",
+      "sha256": "f9c13af325bab4ae57a9be0df0118fa814ce7adbff1a90882419cb0b771634ea"
+    }
+  ],
+  "source_disposition": {
+    "completion_genuinely_observed": false,
+    "disposition": "partial",
+    "final_state": "NOT_FINISHED",
+    "levels_completed": 1,
+    "win_levels": 7,
+    "non_reset_actions": 699,
+    "resets": 12,
+    "total_environment_calls": 711,
+    "elapsed_wall_ms": 10751405
+  },
+  "excluded_material": [
+    "action_sequences",
+    "authority",
+    "authorization",
+    "domain_state",
+    "frames",
+    "permission",
+    "private_reasoning",
+    "raw_traces",
+    "replay_state"
+  ],
+  "facts": [
+    {
+      "fact_id": "v2-ls20-cardinal-five-pixel-displacement",
+      "status": "supported_bounded",
+      "statement": "Legal cardinal inputs repeatedly displaced the controlled five-by-five block by five pixels along aligned corridors.",
+      "scope": "ls20-9607627b run-local observations",
+      "evidence_refs": [
+        "6198ec6dc547d41786beb88d02551991c0c4b3c071f8d0beb7d7a0a61206d0cc",
+        "f928de59f0942eee671a58b1f45437be381eac7436272b94df52bf4db381e556"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Observed only on legal aligned corridors in this public game.",
+      "reopening_condition": "Any later legal input with a conflicting displacement or footprint consequence."
+    },
+    {
+      "fact_id": "v2-ls20-edge-safety-state-direction-local",
+      "status": "supported_bounded",
+      "statement": "Connector traversability must remain indexed by state and direction; matching appearance alone did not earn a general safety rule.",
+      "scope": "ls20-9607627b tested connector contacts",
+      "evidence_refs": [
+        "bb44fbef993c42dc169c56ea70f03bb1a2344b7068ee2fc93dc67c833be8bfc4"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Untested directions and states remain unresolved.",
+      "reopening_condition": "A discriminating contact shows direction or prior state is irrelevant, or exposes an additional condition."
+    },
+    {
+      "fact_id": "v2-ls20-level1-blue-white-blue-transition",
+      "status": "supported_bounded",
+      "statement": "A level-1 blue-socket rejection, an intervening white contact, and blue-socket recontact produced one official level transition.",
+      "scope": "one official level-1 transition in ls20-9607627b",
+      "evidence_refs": [
+        "4057e65e33f4024680c9ed21c8f695e05343e95997fbd52fec1e6811f0a0e497",
+        "f45f7dd2c01af0646503676ee24163d715f5d3f1b24fe216e966b427312d1a5a"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "The observation does not establish that the white contact is necessary or sufficient in every state.",
+      "reopening_condition": "A disjoint observation removes, replaces, or reorders the intervening event while preserving the transition."
+    },
+    {
+      "fact_id": "v2-ls20-level2-yellow-removal-refill",
+      "status": "supported_bounded",
+      "statement": "Each of two distinct contacted level-2 yellow rings disappeared and restored the visible action bar to full.",
+      "scope": "two run-local level-2 contacts in ls20-9607627b",
+      "evidence_refs": [
+        "f631a1dc18c9c9e2ac07c903dee2501ce82033da9d3359821c1ae4e52d051ae7"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Only the visible disappearance and refill consequence were established.",
+      "reopening_condition": "A later yellow contact fails to disappear or replenish, or reveals a distinct hidden state consequence."
+    },
+    {
+      "fact_id": "v2-ls20-level2-refill-persistence",
+      "status": "supported_bounded",
+      "statement": "One yellow-ring refill remained usable through at least 21 later successful environment actions.",
+      "scope": "one run-local level-2 interval in ls20-9607627b",
+      "evidence_refs": [
+        "277db6c48bcdb0f4e2116246bdfb72453f23213760b0b8398a074a18596f2323"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [
+        "v2-ls20-level2-yellow-removal-refill"
+      ],
+      "supersedes_fact_ids": [],
+      "uncertainty": "This is a lower bound on one observed interval, not a permanence claim.",
+      "reopening_condition": "A later run identifies a shorter expiration boundary or another consumption mechanism."
+    },
+    {
+      "fact_id": "v2-ls20-reset-retains-level-count",
+      "status": "supported_bounded",
+      "statement": "Observed reset recovery restored the active surface while retaining the already completed-level count.",
+      "scope": "run-local reset recovery after level-1 completion in ls20-9607627b",
+      "evidence_refs": [
+        "584dfca4ddea72445724a67405cd3da3894a52e9cd668dd6b495a59f6d77564b"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Other reset causes and later levels were not exhaustively tested.",
+      "reopening_condition": "Any permitted reset changes completed-level count or restores a different active state."
+    },
+    {
+      "fact_id": "v2-ls20-level2-upper-only-rejected",
+      "status": "exact_negative_bounded",
+      "statement": "The tested level-2 upper-yellow-only history did not produce socket acceptance.",
+      "scope": "one or more bounded ls20-9607627b socket tests",
+      "evidence_refs": [
+        "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Rejects only the tested abstract event history under its observed state.",
+      "reopening_condition": "An official acceptance under a matching abstract history and reconciled state."
+    },
+    {
+      "fact_id": "v2-ls20-level2-white-lower-upper-rejected",
+      "status": "exact_negative_bounded",
+      "statement": "The tested level-2 white, lower-yellow, upper-yellow history did not produce socket acceptance.",
+      "scope": "bounded ls20-9607627b socket test",
+      "evidence_refs": [
+        "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "The concise history omits raw path and state bytes by design.",
+      "reopening_condition": "An official acceptance under a matching abstract history and reconciled state."
+    },
+    {
+      "fact_id": "v2-ls20-level2-white-lower-white-upper-rejected",
+      "status": "exact_negative_bounded",
+      "statement": "The tested level-2 white, lower-yellow, white, upper-yellow history did not produce socket acceptance.",
+      "scope": "bounded ls20-9607627b socket test",
+      "evidence_refs": [
+        "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "The concise history omits raw path and state bytes by design.",
+      "reopening_condition": "An official acceptance under a matching abstract history and reconciled state."
+    },
+    {
+      "fact_id": "v2-ls20-level2-lower-white-upper-rejected",
+      "status": "exact_negative_bounded",
+      "statement": "The tested level-2 lower-yellow, white, upper-yellow history was rejected at the blue socket.",
+      "scope": "one official socket outcome in ls20-9607627b",
+      "evidence_refs": [
+        "7242a0f4f33a52c056b948869029fdc3266a41250e414a3181735935dbb0a340",
+        "8b70bce8b61a532a2fba0087e8c8edf92e68bbbbfe8ea0d01fab751420625142"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "This does not identify the accepted composition.",
+      "reopening_condition": "An official transition isolates a compatible accepted history or an untracked state difference."
+    },
+    {
+      "fact_id": "v2-ls20-level2-yellow-yellow-white-rejected",
+      "status": "exact_negative_bounded",
+      "statement": "Tested two-yellow-then-white level-2 variants did not produce socket acceptance across the tested contact gaps.",
+      "scope": "bounded ls20-9607627b socket tests",
+      "evidence_refs": [
+        "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Only tested gaps and observed state are excluded.",
+      "reopening_condition": "An official acceptance under a matching abstract history and reconciled gap/state conditions."
+    },
+    {
+      "fact_id": "v2-ls20-level2-upper-white-lower-direct-rejected",
+      "status": "exact_negative_bounded",
+      "statement": "The tested level-2 upper-yellow, white, lower-yellow history did not produce acceptance at the direct lower connectors.",
+      "scope": "bounded ls20-9607627b direct-lower connector tests",
+      "evidence_refs": [
+        "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Other return routes and hidden state distinctions remain unresolved.",
+      "reopening_condition": "An official acceptance under the same abstract history with reconciled connector state."
+    },
+    {
+      "fact_id": "v2-ls20-level2-accepted-history",
+      "status": "unresolved",
+      "statement": "The accepted level-2 socket contact history remains unknown.",
+      "scope": "ls20-9607627b after Calibration 002",
+      "evidence_refs": [
+        "a053a8ddc7dce707c9d4a8f906691e7b1703d35a968cf00d0e4d0e19a016210f",
+        "97bc8535e29c355cd66d3458134d2533661c02067149cb783d6ce285632b0991"
+      ],
+      "counterevidence_refs": [],
+      "predecessor_fact_ids": [],
+      "supersedes_fact_ids": [],
+      "uncertainty": "Every later level also remains unresolved.",
+      "reopening_condition": "The next smallest state- and order-discriminating probe or an official level transition."
+    }
+  ],
+  "consumption_rules": {
+    "fresh_generalization_arm_may_consume": false,
+    "same_game_adaptive_successor_may_consume_after_target_bound_review": true,
+    "target_stage_binding_required": true,
+    "source_campaign_remains_immutable": true,
+    "transfers_authority": false
+  }
+}

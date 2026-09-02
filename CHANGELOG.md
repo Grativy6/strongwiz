@@ -8,6 +8,18 @@ Publication remains pending an explicitly authorized tag and release.
 
 ### Added
 
+- A representation-only scribe with a distinct driver identity, receipt-bound
+  material, deterministic adaptation/held-out validation splits, mechanical
+  Kevin Speak evaluation, lossless failure fallback, and restart-safe cycle
+  identities.
+- A targeted PAL v2.3 adapter for role-typed boundaries, exact compared-state
+  projections, immutable grant epochs, administrative/productive cadence,
+  checkpoint freeze/thaw, transport breaks, and re-entry.
+- Preparation-only Calibration 003 machinery for matched physically fresh
+  no-scribe/scribe arms and a source-bound Calibration 002 carry packet. No ARC
+  environment run is part of this build.
+- Five exact PAL v2.3 source identities and prospective `SUCCESSOR` provenance.
+
 - Experimental Kevin Speak working ledgers with blank genesis, a fixed
   nonexecuting decoder, recursive immutable codebooks, exact reconstruction,
   an uncompressed residual lane, and charged adaptation/validation gates.
@@ -24,8 +36,13 @@ Publication remains pending an explicitly authorized tag and release.
 
 ### Changed
 
-- Development package version advanced to `0.3.0.dev0`; the public contract
+- Development package version advanced to `0.4.0.dev0`; the public contract
   remains `strongwiz.contract.v1`.
+- Kevin next-round semantic recommendation IDs are idempotent for identical
+  content and reject conflicting reuse.
+
+- Development package version advanced to `0.3.0.dev0`; the public contract
+  remains `strongwiz.contract.v1` as historical v0.3 development provenance.
 
 ## [0.2.0] - release candidate
 

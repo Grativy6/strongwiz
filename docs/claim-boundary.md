@@ -22,7 +22,7 @@ domain's terminal authority. A domain adapter, executor, model artifact,
 configuration, and external control plane are still required for an
 operational system.
 
-Version 0.3 development code can create an empty lab, restore all session
+Version 0.4 development code can create an empty lab, restore all session
 phases, seal a terminal run, and export every referenced ledger object and
 receipt. Those mechanisms
 establish integrity and restart behavior on their tested surfaces. They do not
@@ -37,6 +37,27 @@ behavior, improved reasoning, or reduced total campaign cost. A source model's
 recommendation and a reviewer model's refinement remain advisory; only a
 separate scoped adoption decision can admit an exact codebook to one successor
 stage, and that decision transfers no action authority.
+
+The dedicated scribe can establish, on its tested software surface, that its
+declared request view contains adaptation material but omits held-out
+validation payloads, accepts only declarative symbol proposals, and preserves
+failed-cycle inputs as pending, exactly decodable compact-or-residual entries.
+The in-process callable driver is trusted application code: it may capture
+other process references, so this interface is data minimization rather than a
+confidentiality sandbox. It does not
+establish that a provider lacked some other access, understood the summaries,
+that they were true or complete, that model behavior was preserved, or that
+compression improved reasoning or play.
+The closed input schema and resolvable evidence references enforce declared
+structure; they cannot detect forbidden material paraphrased inside free text.
+Truthful source classification remains an upstream responsibility.
+
+The PAL v2.3 module is a targeted prospective adapter. Its role-typed boundary,
+projection, grant-epoch, checkpoint, cadence, and transport records do not
+establish package-wide PAL conformance. A heartbeat stutter is an
+administrative audit transition, not progress, liveness, success,
+consciousness, permission, or authorization. An exact checkpoint thaw does not
+restore spent resources, expired grants, or authority.
 
 The streaming ledger snapshot bounds verification and sealing memory by a row
 plus a fixed-cache disk index on the tested surface. It does not yet make

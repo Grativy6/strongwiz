@@ -54,6 +54,56 @@
       "version": "0.1"
     },
     {
+      "authority_ceiling": "migration guidance only; cannot redefine the spine, enlarge Atlas results, close ledger burdens, or establish full PAL v2.3 conformance",
+      "local_artifact_sha256": "57bd5432c6a0a4474c781f918e60e1fcf3f1b80119bfdc317bf6c17bbbc80f07",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22240134",
+      "role": "prospective v2.2-to-v2.3 migration mapping and non-retrofit constraints",
+      "source_id": "paper-pal-v2.3-c-compatibility-note",
+      "source_kind": "paper",
+      "title": "Compatibility Note",
+      "version": "2.3-C"
+    },
+    {
+      "authority_ceiling": "ledger authority only; records rather than manufactures closure, evidence, permission, authorization, or Strongwiz conformance",
+      "local_artifact_sha256": "694449304139c642c5112f9e41f3b41848a652fc7d12b9a60450bf5e776f704b",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22240134",
+      "role": "prospective decision, obligation, residual, and reopening ledger for PAL v2.3 adoption",
+      "source_id": "paper-pal-v2.3-l-obligation-decision-ledger",
+      "source_kind": "paper",
+      "title": "Obligation and Decision Ledger",
+      "version": "2.3-L"
+    },
+    {
+      "authority_ceiling": "realization authority only; does not amend the spine or establish universal, empirical, ontological, or independent-validation claims",
+      "local_artifact_sha256": "c053292376363edd6fc743f0f2e31e3bb3850edc78ade3a289bbb07e7e8452c5",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22240134",
+      "role": "prospective mathematical realization maps, typed boundary adapters, and scoped fixtures for PAL v2.3",
+      "source_id": "paper-pal-v2.3-m-mathematical-realization-atlas",
+      "source_kind": "paper",
+      "title": "Mathematical Realization Atlas",
+      "version": "2.3-M"
+    },
+    {
+      "authority_ceiling": "mechanical framework source only; creates no external authority and does not establish full Strongwiz conformance to PAL v2.3",
+      "local_artifact_sha256": "e9517b17278b72995f22469d825a62ad9a47d3a151089684f3d4c3ef96e4e9a2",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22240134",
+      "role": "prospective mechanical semantics and invariant vocabulary for new Strongwiz records",
+      "source_id": "paper-pal-v2.3-spine",
+      "source_kind": "paper",
+      "title": "Mechanical Structural Spine",
+      "version": "2.3"
+    },
+    {
+      "authority_ceiling": "test specification only; passing bounded checks is not full PAL v2.3 conformance or independent validation",
+      "local_artifact_sha256": "bf79d3a76ef71d6946704be551488bdfe2c062231f4a0c1a85bb51b203fe4b89",
+      "persistent_id": "https://doi.org/10.5281/zenodo.22240134",
+      "role": "prospective PAL v2.3 conformance specifications, fixtures, falsifiers, and reopening handles",
+      "source_id": "paper-pal-v2.3-t-conformance-tests",
+      "source_kind": "paper",
+      "title": "Conformance Tests",
+      "version": "2.3-T"
+    },
+    {
       "authority_ceiling": "bounded lemma source; does not turn transport evidence into proof of unrelated claims",
       "local_artifact_sha256": "c9168a69ece8e405d643a86580e6637001de3f14514495d9b3943ce943e0290e",
       "persistent_id": "https://doi.org/10.5281/zenodo.21882601",

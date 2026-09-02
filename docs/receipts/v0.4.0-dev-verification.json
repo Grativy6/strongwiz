@@ -1,0 +1,110 @@
+{
+  "arc_agi3_result_observed": false,
+  "branch": "codex/strongwiz-v3-pal23-scribe",
+  "calibration_002_carry": {
+    "fact_count": 13,
+    "file_sha256": "87d9b31d61191f8765d41e51f03c2dac77d7c484ba397efb491cf91bea4a2bea",
+    "semantic_truth_inferred_from_reference_resolution": false,
+    "source_artifact_count": 6,
+    "typed_source_reference_resolution": true
+  },
+  "calibration_003": {
+    "action_port_present": false,
+    "campaign_run_performed": false,
+    "credential_path_present": false,
+    "environment_access_present": false,
+    "matched_shadow_lab_preparation_tested": true,
+    "preregistered_against_frozen_toolbelt": false,
+    "status": "prepared_not_run"
+  },
+  "claim_ceiling": "Strongwiz v3 preparation and bounded mechanism verification only; no ARC run, model-performance result, PAL package-wide conformance, or causal scribe result",
+  "contract_schema": "strongwiz.contract.v1",
+  "coverage": {
+    "percent": "85.76",
+    "required_percent": "85.00",
+    "status": "pass"
+  },
+  "fresh_environment": {
+    "import": "pass",
+    "pal23_schema": "pass",
+    "pip_check": "pass",
+    "scribe_schema": "pass"
+  },
+  "hearthline_used": false,
+  "implementation_commit": "300fd0b9ae1183e582bb834e17ff02bf80189fd8",
+  "implementation_tree": "bb61230e0eacdaff42b8f9d6f2a7abf7b0efaf55",
+  "independent_audit": {
+    "external_independence": false,
+    "material_blockers": 0,
+    "remaining_bounded_residuals": [
+      "free-text semantic honesty remains upstream-owned",
+      "CallableScribeDriver is trusted in-process code, not a confidentiality sandbox",
+      "PAL digest relationships do not independently prove their referents",
+      "typed carry provenance fields do not establish source truth"
+    ],
+    "verdict": "pass_no_remaining_blocker"
+  },
+  "mypy": {
+    "files": 48,
+    "status": "pass",
+    "strict": true
+  },
+  "package": {
+    "artifact_scope": "Strongwiz kernel wheel and source distribution; Calibration 003 remains repository-local experimental harness code",
+    "build_receipt_path": "docs/receipts/v0.4.0-dev-reproducible-build.json",
+    "build_receipt_sha256": "db6878167fa1a75549cc595b78273a14bd489049fe24557cdc4e00967ecf8ccd",
+    "post_normalization_artifacts_identical": true,
+    "sdist_sha256": "da00f96dba00f6a82bc3621d662c642f5d5273789dbb2e1d39b2945c04bd260c",
+    "version": "0.4.0.dev0",
+    "wheel_sha256": "3dbbf7f96d38f59671dc178f8e11f9e076e37497ea653809d75e59cedd39ac59"
+  },
+  "pal_v2_3": {
+    "adapter_claim": "targeted_prospective_only",
+    "full_conformance_claimed": false,
+    "source_artifact_sha256": {
+      "compatibility_note": "57bd5432c6a0a4474c781f918e60e1fcf3f1b80119bfdc317bf6c17bbbc80f07",
+      "conformance_tests": "bf79d3a76ef71d6946704be551488bdfe2c062231f4a0c1a85bb51b203fe4b89",
+      "mathematical_realization_atlas": "c053292376363edd6fc743f0f2e31e3bb3850edc78ade3a289bbb07e7e8452c5",
+      "mechanical_structural_spine": "e9517b17278b72995f22469d825a62ad9a47d3a151089684f3d4c3ef96e4e9a2",
+      "obligation_and_decision_ledger": "694449304139c642c5112f9e41f3b41848a652fc7d12b9a60450bf5e776f704b"
+    }
+  },
+  "platform": {
+    "architecture": "64-bit",
+    "os": "Microsoft Windows 10 Home 10.0.19045",
+    "python": "3.12.14"
+  },
+  "release_actions": {
+    "merged": false,
+    "published": false,
+    "tag_created": false
+  },
+  "ruff": {
+    "check": "pass",
+    "format_file_count": 131,
+    "format_status": "pass"
+  },
+  "schema": "strongwiz.v0.4-development-verification.v1",
+  "scribe": {
+    "confidentiality_sandbox_claimed": false,
+    "dedicated_role_boundary": true,
+    "heldout_payloads_absent_from_request_view": true,
+    "kevin_identity_namespace_hardened": true,
+    "status": "experimental"
+  },
+  "secret_scan": {
+    "embedded_credential_pattern_files": 0,
+    "status": "pass"
+  },
+  "source_registry": {
+    "file_sha256": "c6ed977d2704ee563d1838c5f1f972ed48eb445159057f627cdb2c00fd3455a4",
+    "registry_ref": "055bfbef1e5b0191ef84e266f1c8f888c58def5428113d8b262f0baa8b95dd9a",
+    "source_count": 14,
+    "valid": true
+  },
+  "tests": {
+    "passed": 445,
+    "skipped": 4,
+    "skipped_reason": "two file-symlink and two directory-symlink cases unavailable on this Windows host"
+  }
+}

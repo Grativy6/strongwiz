@@ -1736,6 +1736,34 @@ class KevinSpeakWorkspace:
             raise KevinSpeakError("a nonblank recommendation requires eligible evaluation")
         if not self._receipt_refs:
             raise KevinSpeakError("recommendation requires a durable evidence boundary")
+        normalized_residuals = tuple(sorted(set(known_residuals)))
+        same_identity = tuple(
+            item
+            for item in self._recommendations.values()
+            if item.recommendation_id == recommendation_id
+        )
+        if same_identity:
+            prior = same_identity[0]
+            if len(same_identity) != 1:
+                raise KevinSpeakError(
+                    "recommendation semantic identity is already ambiguous in history"
+                )
+            same_request = (
+                prior.source_workspace_id == self.workspace_id
+                and prior.source_configuration_ref == self.configuration.digest
+                and prior.recommended_codebook_ref == active.digest
+                and prior.recommended_definition_refs
+                == self._registry.effective_definition_refs(active.digest)
+                and prior.evaluation_refs == evidence_refs
+                and prior.recommending_driver_ref == recommending_driver_ref
+                and prior.rationale == rationale
+                and prior.known_residuals == normalized_residuals
+            )
+            if same_request:
+                return prior
+            raise KevinSpeakError(
+                "recommendation semantic identity cannot be reused; issue a new identity"
+            )
         recommendation = KevinNextRoundRecommendation(
             recommendation_id=recommendation_id,
             source_workspace_id=self.workspace_id,
@@ -1746,7 +1774,7 @@ class KevinSpeakWorkspace:
             evaluation_refs=evidence_refs,
             recommending_driver_ref=recommending_driver_ref,
             rationale=rationale,
-            known_residuals=tuple(sorted(set(known_residuals))),
+            known_residuals=normalized_residuals,
         )
         if recommendation.digest in self._recommendations:
             raise KevinSpeakError("next-round recommendation already exists")
