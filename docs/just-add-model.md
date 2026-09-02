@@ -1,6 +1,6 @@
 # Just-add-model boundary
 
-Strongwiz v0.2 makes the model-provider seam small enough that a local model can
+Strongwiz makes the model-provider seam small enough that a local model can
 be attached without rebuilding the laboratory. The stable unit is the
 observation/action/memory/receipt contract, not a particular model runtime.
 
@@ -18,6 +18,13 @@ A model receives one immutable `ReasoningRequest` and returns zero or more
 The model does not supply control state, permission, authorization, execution
 receipts, or terminal status. Strongwiz binds every draft to the exact driver,
 observation, scope, and goal before it becomes a `CandidateProposal`.
+
+An integration may also let the model propose `KevinSymbolProposal` values and
+a next-round shorthand recommendation. Those remain declarative data. The fixed
+decoder, validation suite, and cost gates are mechanical; optional later-model
+review is advisory; and a separately supplied control decision determines the
+exact definitions, if any, admitted to a named successor stage. See
+[`kevin-speak.md`](kevin-speak.md).
 
 ## In-process model
 

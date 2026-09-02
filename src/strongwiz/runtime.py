@@ -321,9 +321,123 @@ class SessionCheckpoint(SessionReceipt):
         )
 
 
+class SessionCheckpointV2(ContractModel):
+    """Reference-normalized durable checkpoint with constant-size history metadata.
+
+    Historical scan, decision, assessment, and earlier checkpoint objects already
+    exist as predecessor-linked ledger receipts.  V2 stores their counts and exact
+    tail rather than copying the complete history into every checkpoint.  Restore
+    expands that lineage through the original verified ledger without rerunning a
+    model call or external action.
+    """
+
+    schema_id: str = Field(default="strongwiz.session-checkpoint.v2", alias="schema")
+    session_id: str
+    driver_id: str
+    domain_adapter_id: str
+    frozen_runtime_ref: str
+    router_policy_ref: str
+    cadence_policy_ref: str
+    governing_goal_ref: str
+    phase: SessionPhase
+    terminal_authority: TerminalAuthority | None
+    history_receipt_count: NonNegativeInt
+    history_receipt_head: str | None
+    scan_count: NonNegativeInt
+    decision_count: NonNegativeInt
+    assessment_count: NonNegativeInt
+    admitted_action_count: NonNegativeInt
+    completion_genuinely_observed: bool
+    active_request_ref: str | None = None
+    pending_proposal_ref: str | None = None
+    last_failed_action_ref: str | None = None
+    last_failed_belief_ref: str | None = None
+    account_id: str
+    account_version: NonNegativeInt = 0
+    limitations: tuple[str, ...] = Field(
+        default=(
+            "history reconstruction requires the exact original verified ledger",
+            "admitted actions may still require separate permission, authorization, "
+            "and execution",
+        )
+    )
+
+    @model_validator(mode="after")
+    def validate_reference_checkpoint(self) -> SessionCheckpointV2:
+        if self.schema_id != "strongwiz.session-checkpoint.v2":
+            raise ValueError("unsupported reference checkpoint schema")
+        if not all(
+            value.strip()
+            for value in (
+                self.session_id,
+                self.driver_id,
+                self.domain_adapter_id,
+                self.account_id,
+            )
+        ):
+            raise ValueError("reference checkpoint identities are required")
+        digest_refs = (
+            self.frozen_runtime_ref,
+            self.router_policy_ref,
+            self.cadence_policy_ref,
+            self.governing_goal_ref,
+        )
+        optional_refs = (
+            self.history_receipt_head,
+            self.active_request_ref,
+            self.pending_proposal_ref,
+            self.last_failed_action_ref,
+            self.last_failed_belief_ref,
+        )
+        if any(
+            len(value) != 64
+            or value.lower() != value
+            or any(character not in "0123456789abcdef" for character in value)
+            for value in (*digest_refs, *(item for item in optional_refs if item is not None))
+        ):
+            raise ValueError("reference checkpoint bindings must be lowercase SHA-256 values")
+        if (self.history_receipt_count == 0) != (self.history_receipt_head is None):
+            raise ValueError("reference checkpoint history count and tail disagree")
+        if (self.last_failed_action_ref is None) != (self.last_failed_belief_ref is None):
+            raise ValueError("reference checkpoint failed-action guard is incomplete")
+        if self.assessment_count > self.admitted_action_count:
+            raise ValueError("reference checkpoint assessments exceed admitted actions")
+        if self.phase is SessionPhase.NEEDS_SCAN:
+            if self.active_request_ref is not None or self.pending_proposal_ref is not None:
+                raise ValueError("needs-scan reference checkpoint retains actionable state")
+            if self.terminal_authority is not None:
+                raise ValueError("needs-scan reference checkpoint claims terminal authority")
+        elif self.phase is SessionPhase.READY_TO_ACT:
+            if self.active_request_ref is None or self.pending_proposal_ref is not None:
+                raise ValueError("ready reference checkpoint requires only an active request")
+            if self.terminal_authority is not None:
+                raise ValueError("ready reference checkpoint claims terminal authority")
+        elif self.phase is SessionPhase.AWAITING_ASSESSMENT:
+            if self.active_request_ref is None or self.pending_proposal_ref is None:
+                raise ValueError("awaiting reference checkpoint requires request and proposal")
+            if self.terminal_authority is not None:
+                raise ValueError("awaiting reference checkpoint claims terminal authority")
+        else:
+            if self.active_request_ref is not None or self.pending_proposal_ref is not None:
+                raise ValueError("terminal reference checkpoint retains actionable state")
+            if self.terminal_authority not in {
+                TerminalAuthority.SUCCESS,
+                TerminalAuthority.BLOCKED,
+            }:
+                raise ValueError(
+                    "terminal reference checkpoint requires final domain authority"
+                )
+        if self.completion_genuinely_observed != (
+            self.phase is SessionPhase.TERMINAL
+            and self.terminal_authority is TerminalAuthority.SUCCESS
+        ):
+            raise ValueError("reference checkpoint completion claim disagrees with authority")
+        return self
+
+
 def _checkpoint_from_ledger(
     ledger: SQLiteLedger, checkpoint_receipt_ref: str
-) -> SessionCheckpoint:
+) -> SessionCheckpoint | SessionCheckpointV2:
     """Resolve one checkpoint through only the ledger's public read surface."""
 
     ledger.verify()
@@ -335,8 +449,15 @@ def _checkpoint_from_ledger(
     if len(matches) != 1:
         raise RuntimeError("checkpoint receipt is absent or ambiguous in the ledger")
     envelope = matches[0]
+    payload = ledger.get_payload(envelope.payload_hash)
+    schema_id = payload.get("schema") if isinstance(payload, dict) else None
     try:
-        checkpoint = SessionCheckpoint.model_validate(ledger.get_payload(envelope.payload_hash))
+        if schema_id == "strongwiz.session-checkpoint.v2":
+            checkpoint: SessionCheckpoint | SessionCheckpointV2 = (
+                SessionCheckpointV2.model_validate(payload)
+            )
+        else:
+            checkpoint = SessionCheckpoint.model_validate(payload)
     except ValueError as error:
         raise RuntimeError(
             "ledger receipt does not contain a valid session checkpoint"
@@ -432,6 +553,150 @@ def _validate_checkpoint_ledger(
     return checkpoint_envelope
 
 
+def _validate_reference_checkpoint_ledger(
+    checkpoint: SessionCheckpointV2,
+    ledger: SQLiteLedger,
+    *,
+    checkpoint_receipt_ref: str | None,
+) -> tuple[SessionCheckpoint, ReceiptEnvelope]:
+    """Expand a V2 checkpoint from its exact predecessor-linked ledger history."""
+
+    ledger.verify()
+    envelopes = tuple(ledger.receipts())
+    if checkpoint_receipt_ref is None:
+        matches = tuple(
+            envelope for envelope in envelopes if envelope.payload_hash == checkpoint.digest
+        )
+    else:
+        matches = tuple(
+            envelope for envelope in envelopes if envelope.receipt_id == checkpoint_receipt_ref
+        )
+    if len(matches) != 1:
+        raise RuntimeError("reference checkpoint is absent or ambiguous in the ledger")
+    checkpoint_envelope = matches[0]
+    if checkpoint_envelope.payload_hash != checkpoint.digest:
+        raise RuntimeError("reference checkpoint receipt binds different content")
+    if (
+        checkpoint_envelope.account_id != checkpoint.account_id
+        or checkpoint_envelope.account_version != checkpoint.account_version
+    ):
+        raise RuntimeError("reference checkpoint ledger account binding disagrees")
+    expected_occurrence = (
+        f"{checkpoint.session_id}:{checkpoint.history_receipt_count:08d}:"
+        f"{checkpoint_envelope.kind}"
+    )
+    if checkpoint_envelope.occurrence_id != expected_occurrence:
+        raise RuntimeError("reference checkpoint occurrence is not the session boundary")
+
+    session_envelopes: list[ReceiptEnvelope] = []
+    for envelope in envelopes:
+        payload = ledger.get_payload(envelope.payload_hash)
+        if isinstance(payload, dict) and payload.get("session_id") == checkpoint.session_id:
+            session_envelopes.append(envelope)
+    prior = tuple(
+        envelope
+        for envelope in session_envelopes
+        if envelope.sequence < checkpoint_envelope.sequence
+    )
+    later = tuple(
+        envelope
+        for envelope in session_envelopes
+        if envelope.sequence > checkpoint_envelope.sequence
+    )
+    if later:
+        raise RuntimeError("cannot restore a stale checkpoint over later session receipts")
+    if len(prior) != checkpoint.history_receipt_count:
+        raise RuntimeError("reference checkpoint history count disagrees with the ledger")
+    prior_head = None if not prior else prior[-1].receipt_id
+    if checkpoint.history_receipt_head != prior_head:
+        raise RuntimeError("reference checkpoint history tail disagrees with the ledger")
+    if checkpoint_envelope.parent_refs != (() if prior_head is None else (prior_head,)):
+        raise RuntimeError("reference checkpoint does not bind its exact history tail")
+    for index, envelope in enumerate(prior):
+        expected_parent = () if index == 0 else (prior[index - 1].receipt_id,)
+        if envelope.parent_refs != expected_parent:
+            raise RuntimeError("reference checkpoint predecessor lineage is broken")
+        if (
+            envelope.account_id != checkpoint.account_id
+            or envelope.account_version != checkpoint.account_version
+        ):
+            raise RuntimeError("reference checkpoint history crosses ledger account identity")
+
+    expected_objects = {checkpoint.frozen_runtime_ref}
+    if checkpoint.active_request_ref is not None:
+        expected_objects.add(checkpoint.active_request_ref)
+    if checkpoint.pending_proposal_ref is not None:
+        expected_objects.add(checkpoint.pending_proposal_ref)
+    if not expected_objects.issubset(set(checkpoint_envelope.object_refs)):
+        raise RuntimeError("reference checkpoint omits restart-critical objects")
+
+    scans: list[ScanReceipt] = []
+    decisions: list[DecisionRecord] = []
+    assessments: list[AssessmentRecord] = []
+    for envelope in prior:
+        payload = ledger.get_payload(envelope.payload_hash)
+        try:
+            if envelope.kind == "scan":
+                scans.append(ScanReceipt.model_validate(payload))
+            elif envelope.kind == "decision":
+                decisions.append(DecisionRecord.model_validate(payload))
+            elif envelope.kind == "assessment":
+                assessments.append(AssessmentRecord.model_validate(payload))
+        except ValueError as error:
+            raise RuntimeError(
+                "reference checkpoint history contains an invalid record"
+            ) from error
+    if (
+        len(scans) != checkpoint.scan_count
+        or len(decisions) != checkpoint.decision_count
+        or len(assessments) != checkpoint.assessment_count
+    ):
+        raise RuntimeError("reference checkpoint typed history counts disagree")
+
+    active_request = None
+    if checkpoint.active_request_ref is not None:
+        try:
+            active_request = ReasoningRequest.model_validate(
+                ledger.get_payload(checkpoint.active_request_ref)
+            )
+        except ValueError as error:
+            raise RuntimeError("reference checkpoint active request is invalid") from error
+    pending_proposal = None
+    if checkpoint.pending_proposal_ref is not None:
+        try:
+            pending_proposal = CandidateProposal.model_validate(
+                ledger.get_payload(checkpoint.pending_proposal_ref)
+            )
+        except ValueError as error:
+            raise RuntimeError("reference checkpoint pending proposal is invalid") from error
+
+    expanded = SessionCheckpoint(
+        session_id=checkpoint.session_id,
+        driver_id=checkpoint.driver_id,
+        domain_adapter_id=checkpoint.domain_adapter_id,
+        frozen_runtime_ref=checkpoint.frozen_runtime_ref,
+        router_policy_ref=checkpoint.router_policy_ref,
+        cadence_policy_ref=checkpoint.cadence_policy_ref,
+        governing_goal_ref=checkpoint.governing_goal_ref,
+        phase=checkpoint.phase,
+        terminal_authority=checkpoint.terminal_authority,
+        scans=tuple(scans),
+        decisions=tuple(decisions),
+        assessments=tuple(assessments),
+        admitted_action_count=checkpoint.admitted_action_count,
+        completion_genuinely_observed=checkpoint.completion_genuinely_observed,
+        ledger_receipt_refs=tuple(envelope.receipt_id for envelope in prior),
+        limitations=checkpoint.limitations,
+        active_request=active_request,
+        pending_proposal=pending_proposal,
+        last_failed_action_ref=checkpoint.last_failed_action_ref,
+        last_failed_belief_ref=checkpoint.last_failed_belief_ref,
+        account_id=checkpoint.account_id,
+        account_version=checkpoint.account_version,
+    )
+    return expanded, checkpoint_envelope
+
+
 class ReasoningSession:
     """Enforce no stale action, predicted consequence, and post-action assessment."""
 
@@ -514,7 +779,7 @@ class ReasoningSession:
     @classmethod
     def restore(
         cls,
-        checkpoint: SessionCheckpoint,
+        checkpoint: SessionCheckpoint | SessionCheckpointV2,
         *,
         model_driver: ModelDriver,
         domain_adapter: DomainAdapter,
@@ -528,6 +793,17 @@ class ReasoningSession:
 
         active_router = router_policy or RouterPolicy()
         active_cadence = cadence_policy or CadencePolicy()
+        checkpoint_envelope: ReceiptEnvelope | None = None
+        if isinstance(checkpoint, SessionCheckpointV2):
+            if ledger is None:
+                raise RuntimeError(
+                    "a reference-normalized checkpoint requires its original ledger"
+                )
+            checkpoint, checkpoint_envelope = _validate_reference_checkpoint_ledger(
+                checkpoint,
+                ledger,
+                checkpoint_receipt_ref=checkpoint_receipt_ref,
+            )
         if (
             checkpoint.frozen_runtime_ref != frozen_runtime.manifest_ref
             or checkpoint.driver_id != model_driver.driver_id
@@ -540,13 +816,13 @@ class ReasoningSession:
             raise RuntimeError(
                 "checkpoint does not bind the supplied runtime, driver, domain, and policies"
             )
-        checkpoint_envelope: ReceiptEnvelope | None = None
         if ledger is not None:
-            checkpoint_envelope = _validate_checkpoint_ledger(
-                checkpoint,
-                ledger,
-                checkpoint_receipt_ref=checkpoint_receipt_ref,
-            )
+            if checkpoint_envelope is None:
+                checkpoint_envelope = _validate_checkpoint_ledger(
+                    checkpoint,
+                    ledger,
+                    checkpoint_receipt_ref=checkpoint_receipt_ref,
+                )
         elif checkpoint_receipt_ref is not None:
             raise RuntimeError("a checkpoint receipt reference requires its ledger")
         elif checkpoint.ledger_receipt_refs:
@@ -944,18 +1220,54 @@ class ReasoningSession:
     def checkpoint(self, *, kind: str = "session_checkpoint") -> str | None:
         """Append one replay-complete session snapshot without changing session state."""
 
-        snapshot = self.checkpoint_snapshot()
-        values: list[ContractModel] = [
-            *snapshot.scans,
-            *snapshot.decisions,
-            *snapshot.assessments,
-        ]
-        if snapshot.active_request is not None:
-            values.append(snapshot.active_request)
-        if snapshot.pending_proposal is not None:
-            values.append(snapshot.pending_proposal)
+        if self._ledger is None:
+            return None
+        snapshot = self.reference_checkpoint_snapshot()
+        values: list[ContractModel] = []
+        if self._request is not None:
+            values.append(self._request)
+        if self._pending is not None:
+            values.append(self._pending)
         object_refs = self._store(*values)
         return self._record(kind, snapshot, object_refs=object_refs)
+
+    def reference_checkpoint_snapshot(self) -> SessionCheckpointV2:
+        """Return compact durable state; history stays in predecessor receipts."""
+
+        failed_action_ref: str | None = None
+        failed_belief_ref: str | None = None
+        if self._last_failed_signature is not None:
+            failed_action_ref, failed_belief_ref = self._last_failed_signature
+        admitted = sum(
+            decision.route.disposition in {RouteDisposition.ADMIT, RouteDisposition.REOPEN}
+            for decision in self._decisions
+        )
+        return SessionCheckpointV2(
+            session_id=self.session_id,
+            driver_id=self.driver_id,
+            domain_adapter_id=self.domain_adapter_id,
+            frozen_runtime_ref=self.frozen_runtime_ref,
+            router_policy_ref=self.router_policy.digest,
+            cadence_policy_ref=self.cadence_policy.digest,
+            governing_goal_ref=self.governing_goal_ref,
+            phase=self.phase,
+            terminal_authority=self._terminal,
+            history_receipt_count=len(self._ledger_receipt_refs),
+            history_receipt_head=(
+                None if not self._ledger_receipt_refs else self._ledger_receipt_refs[-1]
+            ),
+            scan_count=len(self._scans),
+            decision_count=len(self._decisions),
+            assessment_count=len(self._assessments),
+            admitted_action_count=admitted,
+            completion_genuinely_observed=self._terminal is TerminalAuthority.SUCCESS,
+            active_request_ref=None if self._request is None else self._request.digest,
+            pending_proposal_ref=None if self._pending is None else self._pending.digest,
+            last_failed_action_ref=failed_action_ref,
+            last_failed_belief_ref=failed_belief_ref,
+            account_id=self._account_id,
+            account_version=self._account_version,
+        )
 
     def checkpoint_snapshot(self) -> SessionCheckpoint:
         """Return the exact immutable state that :meth:`checkpoint` persists."""
@@ -1048,7 +1360,7 @@ class StrongwizKernel:
     def restore_session(
         self,
         *,
-        checkpoint: SessionCheckpoint | str,
+        checkpoint: SessionCheckpoint | SessionCheckpointV2 | str,
         frozen_runtime: FrozenRuntimeManifest,
         ledger: SQLiteLedger | None = None,
         router_policy: RouterPolicy | None = None,

@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from strongwiz.canonical import canonical_bytes
 from strongwiz.contracts import CandidateProposal
 from strongwiz.drivers import DriverRegistry
 from strongwiz.ledger import SQLiteLedger
@@ -15,6 +16,7 @@ from strongwiz.runtime import (
     ReasoningSession,
     RuntimeError,
     SessionCheckpoint,
+    SessionCheckpointV2,
     SessionPhase,
     StrongwizKernel,
 )
@@ -272,3 +274,58 @@ def test_receipt_reference_requires_original_ledger() -> None:
             checkpoint=ref("not-a-checkpoint-receipt"),
             frozen_runtime=frozen_runtime(),
         )
+
+
+def test_durable_v2_checkpoints_reference_history_without_quadratic_copying(
+    tmp_path: Path,
+) -> None:
+    candidate = proposal()
+    driver = CountingDriver((candidate,))
+    domain = SyntheticDomain()
+    kernel = registered_kernel(driver, domain)
+    checkpoint_refs: list[str] = []
+    with SQLiteLedger(tmp_path / "normalized.sqlite3") as ledger:
+        active = active_session(driver, domain, ledger=ledger)
+        for index in range(12):
+            active.scan(request())
+            waiting = active.checkpoint(kind="waiting")
+            assert waiting is not None
+            checkpoint_refs.append(waiting)
+            prepared = prepare_execution(candidate, fixture_id=f"normalized-{index}")
+            decision = active.decide(prepared.control)
+            admitted = active.checkpoint(kind="admitted")
+            assert admitted is not None
+            checkpoint_refs.append(admitted)
+            active.assess(
+                prepared.execute(decision.route),
+                matched_prediction_items=("visible",),
+                residual_refs=(),
+                preserved_hypothesis_refs=("hyp-1",),
+                revised_hypothesis_refs=(),
+                concise_update_summary="continued under the same supported mechanic",
+            )
+            assessed = active.checkpoint(kind="assessed")
+            assert assessed is not None
+            checkpoint_refs.append(assessed)
+
+        envelopes = {item.receipt_id: item for item in ledger.receipts()}
+        payload_sizes: list[int] = []
+        for checkpoint_ref in checkpoint_refs:
+            payload = ledger.get_payload(envelopes[checkpoint_ref].payload_hash)
+            compact = SessionCheckpointV2.model_validate(payload)
+            assert compact.schema_id == "strongwiz.session-checkpoint.v2"
+            payload_sizes.append(len(canonical_bytes(payload)))
+        # Counts gain digits eventually, but the checkpoint does not contain the
+        # growing scan/decision/assessment arrays or receipt-ref history.
+        same_phase_sizes = payload_sizes[2::3]
+        assert max(same_phase_sizes) - min(same_phase_sizes) < 16
+        assert max(payload_sizes) < 1_500
+        assert payload_sizes[-1] * 5 < len(canonical_bytes(active.checkpoint_snapshot()))
+
+        latest = checkpoint_refs[-1]
+        restored = kernel.restore_session(
+            checkpoint=latest,
+            frozen_runtime=frozen_runtime(),
+            ledger=ledger,
+        )
+        assert restored.receipt() == active.receipt()

@@ -28,6 +28,7 @@ from strongwiz.lab import (
 from strongwiz.ledger import SQLiteLedger
 from strongwiz.provenance import load_source_registry
 from strongwiz.routing import evaluate_proposal
+from strongwiz.shorthand import KevinSpeakWorkspace, kevin_speak_schema_bundle
 
 
 class _RouteInput(BaseModel):
@@ -57,6 +58,37 @@ def _parser() -> argparse.ArgumentParser:
     )
     source.add_argument("registry", type=Path)
     source.set_defaults(handler=_verify_sources)
+
+    kevin = subcommands.add_parser(
+        "kevin", help="initialize or audit an adaptive Kevin Speak working ledger"
+    )
+    kevin_commands = kevin.add_subparsers(dest="kevin_command", required=True)
+    kevin_schema = kevin_commands.add_parser(
+        "schema", help="print the declarative Kevin Speak boundary schemas"
+    )
+    kevin_schema.set_defaults(handler=_kevin_schema)
+    kevin_init = kevin_commands.add_parser("init", help="open one blank shorthand surface")
+    kevin_init.add_argument("ledger", type=Path)
+    kevin_init.add_argument("--workspace-id", required=True)
+    kevin_init.add_argument("--account-id")
+    kevin_init.add_argument("--account-version", type=int, default=0)
+    kevin_init.set_defaults(handler=_kevin_init)
+    kevin_verify = kevin_commands.add_parser(
+        "verify", help="reconstruct and verify one shorthand workspace"
+    )
+    kevin_verify.add_argument("ledger", type=Path)
+    kevin_verify.add_argument("--workspace-id", required=True)
+    kevin_verify.add_argument("--account-id")
+    kevin_verify.add_argument("--account-version", type=int, default=0)
+    kevin_verify.set_defaults(handler=_kevin_verify)
+    kevin_table = kevin_commands.add_parser(
+        "table", help="print the active reversible translation table"
+    )
+    kevin_table.add_argument("ledger", type=Path)
+    kevin_table.add_argument("--workspace-id", required=True)
+    kevin_table.add_argument("--account-id")
+    kevin_table.add_argument("--account-version", type=int, default=0)
+    kevin_table.set_defaults(handler=_kevin_table)
 
     lab = subcommands.add_parser("lab", help="create and audit sealed laboratories")
     lab_commands = lab.add_subparsers(dest="lab_command", required=True)
@@ -204,6 +236,59 @@ def _verify_sources(args: argparse.Namespace) -> int:
             }
         )
     )
+    return 0
+
+
+def _kevin_init(args: argparse.Namespace) -> int:
+    with SQLiteLedger(args.ledger) as ledger:
+        workspace = KevinSpeakWorkspace.open_blank(
+            ledger,
+            workspace_id=args.workspace_id,
+            account_id=args.account_id,
+            account_version=args.account_version,
+        )
+        result = workspace.verify()
+    print(canonical_text(result))
+    return 0
+
+
+def _kevin_schema(_args: argparse.Namespace) -> int:
+    print(canonical_text(kevin_speak_schema_bundle()))
+    return 0
+
+
+def _restore_kevin(args: argparse.Namespace) -> KevinSpeakWorkspace:
+    ledger = SQLiteLedger(args.ledger, readonly=True)
+    try:
+        workspace = KevinSpeakWorkspace.restore(
+            ledger,
+            workspace_id=args.workspace_id,
+            account_id=args.account_id,
+            account_version=args.account_version,
+        )
+    except Exception:
+        ledger.close()
+        raise
+    return workspace
+
+
+def _kevin_verify(args: argparse.Namespace) -> int:
+    workspace = _restore_kevin(args)
+    try:
+        result = workspace.verify()
+    finally:
+        workspace.close()
+    print(canonical_text(result))
+    return 0
+
+
+def _kevin_table(args: argparse.Namespace) -> int:
+    workspace = _restore_kevin(args)
+    try:
+        result = workspace.translation_table()
+    finally:
+        workspace.close()
+    print(canonical_text(result))
     return 0
 
 

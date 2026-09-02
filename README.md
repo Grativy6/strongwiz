@@ -10,9 +10,10 @@ identity of the work.
 The project is general-purpose. ARC-AGI-3 is one development adapter and source
 of hard-won machinery; it is not the kernel's definition.
 
-> Status: `0.2.0`, public-release candidate. The typed kernel, lab-genesis
+> Status: `0.3.0.dev0`, development build. The typed kernel, lab-genesis
 > commands, local model adapters, resumable sessions, and sealed evidence
-> capsules are runnable. No `v0.2.0` tag or release has been published yet.
+> capsules are runnable. Kevin Speak and its adaptive curriculum are
+> experimental and disabled by default. No `v0.3.0` release has been published.
 > This is not an ARC Prize submission or evidence of general intelligence.
 
 ## The declared boundary
@@ -80,6 +81,10 @@ requires the exact completed execution evidence.
   adapters, policies, and model artifacts;
 - restart-complete checkpoints for every session phase without repeating a
   model call or environment action;
+- reference-normalized durable checkpoints that retain history by exact ledger
+  references instead of copying an ever-growing session history into each save;
+- bounded-memory ledger verification and sealing whose projection identities
+  remain byte-compatible with the existing evidence-capsule contract;
 - zero-state `LabManifest`/`RunSpec` genesis with an empty ledger and no prior
   domain state;
 - immutable terminal run seals and complete portable evidence capsules that
@@ -88,7 +93,14 @@ requires the exact completed execution evidence.
   newline-delimited terminal protocol;
 - structural model/domain conformance reports that grant no execution
   authority;
-- explicit, replaceable experimental features, with GPPR disabled by default;
+- explicit, replaceable experimental features, with GPPR and Kevin Speak
+  disabled by default;
+- blank, model-authored Kevin Speak codebooks with a fixed decoder, exact
+  round trips, uncompressed residuals, multi-case promotion gates, and
+  recommendation -> review/refinement -> scoped adoption -> transfer receipts;
+- an event-driven steering heartbeat that suppresses unchanged timer-like pings;
+- a 30/60/90/final adaptive curriculum with one separately sealed run per stage
+  and explicit learned-stack inheritance;
 - an exact six-paper and PEA/PECAN/SEED source-identity registry;
 - a deliberately narrow ARC-AGI-3 terminal-authority adapter with no game IDs,
   policies, or action scripts.
@@ -144,6 +156,10 @@ strongwiz schema
 strongwiz schema --all
 strongwiz verify-ledger path/to/run.sqlite3
 strongwiz verify-sources docs/source-identities.json
+strongwiz kevin schema
+strongwiz kevin init path/to/kevin.sqlite3 --workspace-id my-run
+strongwiz kevin verify path/to/kevin.sqlite3 --workspace-id my-run
+strongwiz kevin table path/to/kevin.sqlite3 --workspace-id my-run
 ```
 
 Create and verify a genuinely empty laboratory from predeclared manifests,
@@ -168,6 +184,10 @@ nonexecuting route through the declared proposal/control boundary. Run
 generic non-ARC lab that starts from genesis, uses a local model, crosses the
 exact grant/single-writer boundary, observes domain success, resumes from a
 complete checkpoint surface, and packs a verified evidence capsule.
+Run [`examples/kevin_speak_campaign.py`](examples/kevin_speak_campaign.py) for
+a synthetic non-ARC source -> sealed bundle -> stronger-model review -> scoped
+adoption -> successor shorthand demonstration. It tests representation
+mechanics only and does not evaluate model-facing behavior.
 The audited foundation commands, results, reproducible-wheel hash, and claim
 ceiling are recorded in
 [`docs/foundation-verification.md`](docs/foundation-verification.md).
@@ -195,6 +215,8 @@ These are bounded software interfaces, not legal or ethical authorities. See
 - [Adapters and packaging](docs/adapters.md)
 - [Lab genesis and sealed runs](docs/lab-genesis.md)
 - [Just-add-model guide](docs/just-add-model.md)
+- [Kevin Speak](docs/kevin-speak.md)
+- [Adaptive calibration campaigns](docs/adaptive-calibration.md)
 - [Retention ablations](docs/retention-ablation.md)
 - [Claim boundary](docs/claim-boundary.md)
 - [Provenance](docs/provenance.md)

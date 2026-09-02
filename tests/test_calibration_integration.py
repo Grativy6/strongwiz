@@ -6,6 +6,7 @@ import socket
 import subprocess
 import threading
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -57,6 +58,57 @@ from strongwiz.transport import (
 )
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+CALIBRATION_001_INTEGRATION_COMMIT = "8ea0d62a57012497debdc77652a9d0acb4395df0"
+
+
+@pytest.fixture(scope="module")
+def calibration_001_repository() -> Iterator[Path]:
+    """Expose Calibration 001 to its frozen source tree, never the evolved kernel."""
+
+    worktree = REPOSITORY_ROOT / ".pytest-tmp/w"
+    subprocess.run(
+        ["git", "worktree", "prune"],
+        cwd=REPOSITORY_ROOT,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [
+            "git",
+            "worktree",
+            "add",
+            "--detach",
+            str(worktree),
+            CALIBRATION_001_INTEGRATION_COMMIT,
+        ],
+        cwd=REPOSITORY_ROOT,
+        check=True,
+        capture_output=True,
+    )
+    try:
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=worktree,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout.strip()
+        assert head == CALIBRATION_001_INTEGRATION_COMMIT
+        yield worktree
+    finally:
+        subprocess.run(
+            ["git", "worktree", "remove", "--force", str(worktree)],
+            cwd=REPOSITORY_ROOT,
+            check=True,
+            capture_output=True,
+        )
+
+
+def _calibration_scratch(repository: Path, tmp_path: Path) -> Path:
+    scratch = repository / "playground/t" / content_hash(tmp_path.name)[:8]
+    scratch.mkdir(parents=True)
+    return scratch
 
 
 def _raw_frame(
@@ -418,14 +470,17 @@ def test_loopback_server_uses_framing_and_rejects_duplicate_message_ids(
 
 
 def test_game_over_assessment_retains_failure_then_reset_continues(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    calibration_001_repository: Path,
 ) -> None:
-    assets = tmp_path / "assets"
+    scratch = _calibration_scratch(calibration_001_repository, tmp_path)
+    assets = scratch / "assets"
     assets.mkdir()
     _write_fixture_asset(assets)
-    run_root = tmp_path / "run"
+    run_root = scratch / "run"
     prepare_run(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
         run_id="fixture-game-over-recovery",
@@ -449,7 +504,7 @@ def test_game_over_assessment_retains_failure_then_reset_continues(
     )
     monkeypatch.setattr(OfficialLocalArcPort, "open", lambda **_kwargs: port)
     harness = CalibrationHarness(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
     )
@@ -517,8 +572,8 @@ def test_game_over_assessment_retains_failure_then_reset_continues(
 
     receipt = pack_run(
         run_root=run_root,
-        capsule_root=tmp_path / "capsule",
-        delivery_receipt_path=tmp_path / "delivery-receipt.json",
+        capsule_root=scratch / "capsule",
+        delivery_receipt_path=scratch / "delivery-receipt.json",
     )
     assert receipt.capsule_verified
     assert receipt.terminal_record.final_state == "NOT_FINISHED"
@@ -527,14 +582,17 @@ def test_game_over_assessment_retains_failure_then_reset_continues(
 
 
 def test_held_route_requires_exact_revision_lineage_before_one_admission(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    calibration_001_repository: Path,
 ) -> None:
-    assets = tmp_path / "revision-assets"
+    scratch = _calibration_scratch(calibration_001_repository, tmp_path)
+    assets = scratch / "revision-assets"
     assets.mkdir()
     _write_fixture_asset(assets)
-    run_root = tmp_path / "revision-run"
+    run_root = scratch / "revision-run"
     prepare_run(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
         run_id="fixture-held-proposal-revision",
@@ -551,7 +609,7 @@ def test_held_route_requires_exact_revision_lineage_before_one_admission(
     )
     monkeypatch.setattr(OfficialLocalArcPort, "open", lambda **_kwargs: port)
     harness = CalibrationHarness(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
     )
@@ -681,14 +739,17 @@ def test_held_route_requires_exact_revision_lineage_before_one_admission(
 
 
 def test_initial_reset_failure_is_durable_nonretryable_and_sealable(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    calibration_001_repository: Path,
 ) -> None:
-    assets = tmp_path / "initial-failure-assets"
+    scratch = _calibration_scratch(calibration_001_repository, tmp_path)
+    assets = scratch / "initial-failure-assets"
     assets.mkdir()
     _write_fixture_asset(assets)
-    run_root = tmp_path / "initial-failure-run"
+    run_root = scratch / "initial-failure-run"
     prepare_run(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
         run_id="fixture-initial-reset-failure",
@@ -703,7 +764,7 @@ def test_initial_reset_failure_is_durable_nonretryable_and_sealable(
     monkeypatch.setattr(OfficialLocalArcPort, "open", fail_open)
     with pytest.raises(CalibrationError, match="retry is forbidden"):
         CalibrationHarness(
-            repository_root=REPOSITORY_ROOT,
+            repository_root=calibration_001_repository,
             run_root=run_root,
             assets_root=assets,
         )
@@ -718,7 +779,7 @@ def test_initial_reset_failure_is_durable_nonretryable_and_sealable(
     assert terminal.budget.total_environment_calls == 1
     with pytest.raises(CalibrationError, match="terminal run cannot be reopened"):
         CalibrationHarness(
-            repository_root=REPOSITORY_ROOT,
+            repository_root=calibration_001_repository,
             run_root=run_root,
             assets_root=assets,
         )
@@ -729,14 +790,17 @@ def test_initial_reset_failure_is_durable_nonretryable_and_sealable(
 
 
 def test_unclosed_initial_admission_blocks_retry_and_seals_unknown_effect(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    calibration_001_repository: Path,
 ) -> None:
-    assets = tmp_path / "initial-interrupt-assets"
+    scratch = _calibration_scratch(calibration_001_repository, tmp_path)
+    assets = scratch / "initial-interrupt-assets"
     assets.mkdir()
     _write_fixture_asset(assets)
-    run_root = tmp_path / "initial-interrupt-run"
+    run_root = scratch / "initial-interrupt-run"
     prepare_run(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
         run_id="fixture-initial-reset-interrupt",
@@ -751,7 +815,7 @@ def test_unclosed_initial_admission_blocks_retry_and_seals_unknown_effect(
     monkeypatch.setattr(OfficialLocalArcPort, "open", interrupt_open)
     with pytest.raises(KeyboardInterrupt):
         CalibrationHarness(
-            repository_root=REPOSITORY_ROOT,
+            repository_root=calibration_001_repository,
             run_root=run_root,
             assets_root=assets,
         )
@@ -759,7 +823,7 @@ def test_unclosed_initial_admission_blocks_retry_and_seals_unknown_effect(
     assert not (run_root / "state/domain/terminal.record.json").exists()
     with pytest.raises(CalibrationError, match="initial reset was already admitted"):
         CalibrationHarness(
-            repository_root=REPOSITORY_ROOT,
+            repository_root=calibration_001_repository,
             run_root=run_root,
             assets_root=assets,
         )
@@ -774,7 +838,9 @@ def test_unclosed_initial_admission_blocks_retry_and_seals_unknown_effect(
 
 
 def test_budget_preflight_and_reserve_race_are_known_no_effect(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    calibration_001_repository: Path,
 ) -> None:
     clock = [0.0]
     limits = CalibrationBudgets(
@@ -819,12 +885,13 @@ def test_budget_preflight_and_reserve_race_are_known_no_effect(
     assert executor.known_no_effect_budget_denial(command.idempotency_key) is not None
     assert port.calls == []
 
-    assets = tmp_path / "budget-assets"
+    scratch = _calibration_scratch(calibration_001_repository, tmp_path)
+    assets = scratch / "budget-assets"
     assets.mkdir()
     _write_fixture_asset(assets)
-    run_root = tmp_path / "budget-run"
+    run_root = scratch / "budget-run"
     prepare_run(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
         run_id="fixture-budget-terminal",
@@ -832,7 +899,7 @@ def test_budget_preflight_and_reserve_race_are_known_no_effect(
     live_port = _Port(_raw_frame(GameState.NOT_FINISHED), [])
     monkeypatch.setattr(OfficialLocalArcPort, "open", lambda **_kwargs: live_port)
     harness = CalibrationHarness(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
     )
@@ -859,14 +926,17 @@ def test_budget_preflight_and_reserve_race_are_known_no_effect(
 
 
 def test_post_effect_persistence_failure_returns_frame_and_crash_blocks_retry(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    calibration_001_repository: Path,
 ) -> None:
-    assets = tmp_path / "persistence-assets"
+    scratch = _calibration_scratch(calibration_001_repository, tmp_path)
+    assets = scratch / "persistence-assets"
     assets.mkdir()
     _write_fixture_asset(assets)
-    run_root = tmp_path / "persistence-run"
+    run_root = scratch / "persistence-run"
     prepare_run(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
         run_id="fixture-post-effect-persistence",
@@ -890,7 +960,7 @@ def test_post_effect_persistence_failure_returns_frame_and_crash_blocks_retry(
 
     monkeypatch.setattr(OfficialLocalArcPort, "open", open_port)
     harness = CalibrationHarness(
-        repository_root=REPOSITORY_ROOT,
+        repository_root=calibration_001_repository,
         run_root=run_root,
         assets_root=assets,
     )
@@ -916,7 +986,7 @@ def test_post_effect_persistence_failure_returns_frame_and_crash_blocks_retry(
     gc.collect()
     with pytest.raises(CalibrationError, match="initial reset was already admitted"):
         CalibrationHarness(
-            repository_root=REPOSITORY_ROOT,
+            repository_root=calibration_001_repository,
             run_root=run_root,
             assets_root=assets,
         )
@@ -975,3 +1045,16 @@ def test_baseline_verifier_rejects_changed_and_untracked_kernel_bytes(
     (kernel / "untracked.py").write_text("UNTRACKED = True\n", encoding="utf-8")
     with pytest.raises(CalibrationError, match="path set"):
         _verify_baseline(repository, commit=commit, tree=tree)
+
+
+def test_calibration_001_rejects_the_current_evolved_kernel() -> None:
+    loaded = load_preregistration(
+        REPOSITORY_ROOT,
+        REPOSITORY_ROOT / "docs/calibrations/001-preregistration.json",
+    )
+    with pytest.raises(CalibrationError, match="pinned kernel"):
+        _verify_baseline(
+            REPOSITORY_ROOT,
+            commit=loaded.preregistration.toolbelt.commit,
+            tree=loaded.preregistration.toolbelt.tree,
+        )
