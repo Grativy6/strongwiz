@@ -115,20 +115,10 @@ def _git(repository_root: Path, *arguments: str) -> str:
     return result.stdout.strip()
 
 
-def _baseline_checkout_bytes(repository_root: Path, commit: str, relative_path: str) -> bytes:
-    result = subprocess.run(
-        [
-            "git",
-            "cat-file",
-            "--filters",
-            f"--path={relative_path}",
-            f"{commit}:{relative_path}",
-        ],
-        cwd=repository_root,
-        check=True,
-        capture_output=True,
-    )
-    return result.stdout
+def _working_tree_blob_id(repository_root: Path, relative_path: str) -> str:
+    """Hash working content through Git's declared clean filters."""
+
+    return _git(repository_root, "hash-object", f"--path={relative_path}", relative_path)
 
 
 def _verify_baseline(repository_root: Path, *, commit: str, tree: str) -> None:
@@ -178,14 +168,13 @@ def _verify_baseline(repository_root: Path, *, commit: str, tree: str) -> None:
         raise CalibrationError("pinned kernel path set differs from the baseline commit")
     for relative in baseline_paths:
         working_path = repository_root / relative
-        if (
-            not working_path.is_file()
-            or working_path.is_symlink()
-            or working_path.read_bytes()
-            != _baseline_checkout_bytes(repository_root, commit, relative)
+        expected_blob = _git(repository_root, "rev-parse", f"{commit}:{relative}")
+        if not working_path.is_file() or working_path.is_symlink() or (
+            _working_tree_blob_id(repository_root, relative) != expected_blob
         ):
             raise CalibrationError(
-                f"pinned kernel working-tree bytes differ from baseline: {relative}"
+                "pinned kernel working-tree bytes differ from baseline after Git clean "
+                f"filtering: {relative}"
             )
 
 
