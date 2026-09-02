@@ -10,7 +10,9 @@ from calibration.core import OfficialAssetAcquirer
 from calibration.models import load_preregistration
 from calibration.server import CalibrationControlServer, send_command
 from calibration.workflow import CalibrationHarness, pack_run, prepare_run, seal_prepared_run
-from strongwiz.canonical import canonical_text, deep_thaw_json, parse_strict_json
+from calibration_002.learning import Calibration002LearningSidecar
+from strongwiz.canonical import canonical_text, content_hash, deep_thaw_json, parse_strict_json
+from strongwiz.shorthand import KevinEvaluationSample, KevinSymbolProposal
 
 STAGE_PREREGISTRATIONS = {
     stage: Path(f"docs/calibrations/002-stage-{stage}-preregistration.json")
@@ -41,6 +43,19 @@ def _load_object(repository_root: Path, path: Path) -> dict[str, object]:
     if not isinstance(value, dict):
         raise ValueError("draft JSON must be an object")
     return dict(value)
+
+
+def _object_list(value: object, label: str) -> list[object]:
+    if not isinstance(value, list):
+        raise ValueError(f"{label} must be a JSON array")
+    return value
+
+
+def _string_tuple(value: object, label: str) -> tuple[str, ...]:
+    values = _object_list(value, label)
+    if not all(isinstance(item, str) for item in values):
+        raise ValueError(f"{label} must contain only strings")
+    return tuple(item for item in values if isinstance(item, str))
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -84,6 +99,43 @@ def _parser() -> argparse.ArgumentParser:
     capsule.add_argument("run_root", type=Path)
     capsule.add_argument("capsule_root", type=Path)
     capsule.add_argument("--receipt", type=Path, required=True)
+
+    learn_create = commands.add_parser(
+        "learn-create", help="create the persistent adaptive-campaign learning ledger"
+    )
+    learn_create.add_argument("ledger", type=Path)
+
+    learn_open = commands.add_parser(
+        "learn-open", help="open stage 1 with a blank Kevin Speak workspace"
+    )
+    learn_open.add_argument("ledger", type=Path)
+    learn_open.add_argument("--run-id", required=True)
+
+    learn_table = commands.add_parser("learn-table", help="show active translations")
+    learn_table.add_argument("ledger", type=Path)
+
+    learn_append = commands.add_parser(
+        "learn-append", help="append one derived, non-authoritative working payload"
+    )
+    learn_append.add_argument("ledger", type=Path)
+    learn_append.add_argument("--input", type=Path, required=True)
+
+    learn_adapt = commands.add_parser(
+        "learn-adapt", help="evaluate and conditionally promote a shorthand revision"
+    )
+    learn_adapt.add_argument("ledger", type=Path)
+    learn_adapt.add_argument("--input", type=Path, required=True)
+
+    learn_recommend = commands.add_parser(
+        "learn-recommend", help="record the model's advisory next-stage shorthand"
+    )
+    learn_recommend.add_argument("ledger", type=Path)
+    learn_recommend.add_argument("--input", type=Path, required=True)
+
+    learn_verify = commands.add_parser(
+        "learn-verify", help="verify the campaign learning ledger and exact round trips"
+    )
+    learn_verify.add_argument("ledger", type=Path)
     return parser
 
 
@@ -173,6 +225,106 @@ def main(argv: list[str] | None = None) -> int:
             capsule_root=args.capsule_root,
             delivery_receipt_path=args.receipt,
         )
+    elif args.command == "learn-create":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        with Calibration002LearningSidecar.create(
+            args.ledger,
+            success_condition_ref=content_hash(
+                {
+                    "authoritative_state": "GameState.WIN",
+                    "exact_game_id": "ls20-9607627b",
+                }
+            ),
+            campaign_id="calibration-002",
+            objective="reach official GameState.WIN on exact public ls20-9607627b",
+            final_authority_source="pinned arcengine.GameState enum",
+        ) as learning:
+            result = learning.verify()
+    elif args.command == "learn-open":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        with Calibration002LearningSidecar.restore(args.ledger) as learning:
+            result = learning.open_stage(run_id=args.run_id)
+    elif args.command == "learn-table":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        with Calibration002LearningSidecar.restore(args.ledger) as learning:
+            result = learning.table()
+    elif args.command == "learn-append":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        payload = _load_object(repository_root, args.input)
+        entry_id = payload.pop("entry_id", None)
+        value = payload.pop("payload", None)
+        if not isinstance(entry_id, str) or value is None or payload:
+            raise ValueError("learn-append requires only entry_id and payload")
+        with Calibration002LearningSidecar.restore(args.ledger) as learning:
+            result = learning.append(entry_id=entry_id, payload=value)
+    elif args.command == "learn-adapt":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        payload = _load_object(repository_root, args.input)
+        proposals = tuple(
+            KevinSymbolProposal.model_validate(value)
+            for value in _object_list(payload.pop("proposals", None), "proposals")
+        )
+        samples = tuple(
+            KevinEvaluationSample.model_validate(value)
+            for value in _object_list(payload.pop("samples", None), "samples")
+        )
+        rationale = payload.pop("rationale", None)
+        evaluation_id = payload.pop("evaluation_id", None)
+        retired_tokens = _string_tuple(
+            payload.pop("retired_tokens", []), "retired_tokens"
+        )
+        model_proposal_ref = payload.pop("model_proposal_ref", None)
+        if (
+            not isinstance(rationale, str)
+            or not isinstance(evaluation_id, str)
+            or payload
+        ):
+            raise ValueError("learn-adapt has missing or unexpected fields")
+        with Calibration002LearningSidecar.restore(args.ledger) as learning:
+            result = learning.adapt(
+                proposals=proposals,
+                samples=samples,
+                rationale=rationale,
+                evaluation_id=evaluation_id,
+                retired_tokens=retired_tokens,
+                model_proposal_ref=(
+                    model_proposal_ref if isinstance(model_proposal_ref, str) else None
+                ),
+            )
+    elif args.command == "learn-recommend":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        payload = _load_object(repository_root, args.input)
+        recommendation_id = payload.pop("recommendation_id", None)
+        rationale = payload.pop("rationale", None)
+        evaluation_refs = _string_tuple(
+            payload.pop("evaluation_refs", []), "evaluation_refs"
+        )
+        known_residuals = _string_tuple(
+            payload.pop("known_residuals", []), "known_residuals"
+        )
+        if (
+            not isinstance(recommendation_id, str)
+            or not isinstance(rationale, str)
+            or payload
+        ):
+            raise ValueError("learn-recommend has missing or unexpected fields")
+        with Calibration002LearningSidecar.restore(args.ledger) as learning:
+            result = learning.recommend(
+                recommendation_id=recommendation_id,
+                recommending_driver_ref=content_hash(
+                    {
+                        "interface": "calibration_002/model-interface.json",
+                        "hosted_weights_bound": False,
+                    }
+                ),
+                evaluation_refs=evaluation_refs,
+                rationale=rationale,
+                known_residuals=known_residuals,
+            )
+    elif args.command == "learn-verify":
+        _require_under(args.ledger, repository_root / "playground", "learning ledger")
+        with Calibration002LearningSidecar.restore(args.ledger) as learning:
+            result = learning.verify()
     else:  # pragma: no cover
         raise AssertionError("unknown command")
     print(canonical_text(result))

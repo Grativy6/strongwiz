@@ -1,0 +1,47 @@
+{
+  "action_selector": {
+    "identity": "fresh context-isolated Codex process",
+    "may_access": [
+      "the current stage control endpoint through calibration_002 commands",
+      "the current stage status projection and current-frame image files",
+      "the current stage blank or explicitly inherited Kevin Speak workspace",
+      "the exact approved learned-stack transfer prepared for this stage",
+      "generic ARC SDK action-interface documentation in this repository"
+    ],
+    "must_not_access": [
+      "ARC3 development repository",
+      "Codex memory or rollout summaries",
+      "Hearthline repositories or context",
+      "official ls20 source code or internal game objects",
+      "prior calibration frames, traces, recordings, proposals, assessments, or action sequences",
+      "prior Scientist traces or derived gameplay hints",
+      "private tags or baseline actions"
+    ],
+    "must_not_call": [
+      "collaboration status/listing tools",
+      "network services",
+      "other agents for gameplay advice"
+    ],
+    "reasoning_record": "concise decision-relevant summaries only; no hidden chain of thought is requested or retained"
+  },
+  "completion": {
+    "authoritative": "the current official environment frame reports GameState.WIN",
+    "game_over": "failure evidence; use RESET only when offered and budget permits",
+    "not_finished": "continue while the current stage budget remains",
+    "progress_is_not_completion": true
+  },
+  "kevin_speak": {
+    "purpose": "lossless working-language compression without changing the reasoning",
+    "rule": "only active translation-table tokens may be used as shorthand; everything else stays in the residual lane",
+    "successor_rule": "recommendations are advisory until separately reviewed and target-bound adoption is recorded"
+  },
+  "loop": [
+    "read status",
+    "inspect only the current projected frame and approved learned stack",
+    "submit one smallest useful proposal draft",
+    "observe the returned official frame",
+    "submit one assessment draft that preserves or revises only implicated hypotheses",
+    "repeat until WIN or the stage boundary"
+  ],
+  "schema": "strongwiz.arc-agi3-calibration-002-model-interface.v1"
+}
