@@ -79,6 +79,31 @@ def test_cli_verifies_declared_source_registry(capsys: object) -> None:
     assert '"valid":true' in output
 
 
+def test_cli_initializes_and_audits_blank_kevin_workspace(
+    tmp_path: Path, capsys: object
+) -> None:
+    assert main(["kevin", "schema"]) == 0
+    schema_output = capsys.readouterr().out  # type: ignore[attr-defined]
+    assert '"contract_version":"strongwiz.kevin-speak.v1"' in schema_output
+    assert '"next_round_recommendation"' in schema_output
+
+    ledger_path = tmp_path / "kevin.sqlite3"
+    base = [str(ledger_path), "--workspace-id", "cli-kevin"]
+
+    assert main(["kevin", "init", *base]) == 0
+    init_output = capsys.readouterr().out  # type: ignore[attr-defined]
+    assert '"codebook_count":1' in init_output
+    assert '"entry_count":0' in init_output
+
+    assert main(["kevin", "verify", *base]) == 0
+    verify_output = capsys.readouterr().out  # type: ignore[attr-defined]
+    assert '"exact_round_trips":true' in verify_output
+
+    assert main(["kevin", "table", *base]) == 0
+    table_output = capsys.readouterr().out  # type: ignore[attr-defined]
+    assert '"translations":[]' in table_output
+
+
 def test_cli_seals_packs_and_verifies_a_partial_run(tmp_path: Path, capsys: object) -> None:
     manifest, spec = lab_contracts()
     manifest_path = tmp_path / "manifest.json"

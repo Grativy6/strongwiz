@@ -65,7 +65,7 @@ class ExperimentalFeatureSet(ContractModel):
 
 
 def default_experimental_features() -> ExperimentalFeatureSet:
-    """Return the inert default; GPPR is available only as an explicit experiment."""
+    """Return inert defaults; optional mechanisms require explicit experiments."""
 
     return ExperimentalFeatureSet(
         features=(
@@ -75,6 +75,17 @@ def default_experimental_features() -> ExperimentalFeatureSet:
                 claim_boundary=(
                     "disabled by default; enabling it does not establish a universal "
                     "optimization"
+                ),
+            ),
+            ExperimentalFeature(
+                feature_id="kevin-speak",
+                purpose=(
+                    "test reversible model-authored working-ledger shorthand under "
+                    "matched storage and model-facing evaluations"
+                ),
+                claim_boundary=(
+                    "disabled by default; exact reconstruction does not establish "
+                    "unchanged model behavior or improved reasoning"
                 ),
             ),
         )

@@ -65,7 +65,7 @@ def test_non_arc_reference_lab_runs_restores_seals_and_packs(tmp_path: Path) -> 
     }
     assert "strongwiz.task-grant.v1" in schemas
     assert "strongwiz.lab-policy-decision.v1" in schemas
-    assert "strongwiz.session-checkpoint.v1" in schemas
+    assert "strongwiz.session-checkpoint.v2" in schemas
 
     with SQLiteLedger(lab / "state" / "ledger.sqlite3", readonly=True) as ledger:
         count, head = ledger.verify()

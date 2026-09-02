@@ -12,7 +12,9 @@ import hashlib
 import os
 import re
 import sqlite3
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Literal
@@ -47,6 +49,7 @@ CAPSULE_RECEIPTS_PATH = "ledger/receipts.jsonl"
 CAPSULE_DOMAIN_STATE_PATH = "domain-state"
 
 _DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_SQLITE_TRANSIENT_SUFFIXES = ("-journal", "-shm", "-wal")
 _PRIVATE_REASONING_KEYS = frozenset(
     {
         "chain_of_thought",
@@ -335,6 +338,33 @@ class ExternalLedgerSeal(ContractModel):
         else:
             _require_digest(self.receipt_head, label="receipt head")
         return self
+
+
+@dataclass(frozen=True)
+class _LedgerSnapshot:
+    seal: ExternalLedgerSeal
+    terminal_object_present: bool
+    terminal_receipt_present: bool
+
+
+class _CanonicalArrayHasher:
+    """Hash canonical values as one JSON array without retaining prior rows."""
+
+    def __init__(self) -> None:
+        self._digest = hashlib.sha256()
+        self._digest.update(b"[")
+        self._count = 0
+
+    def update(self, value: bytes) -> None:
+        if self._count:
+            self._digest.update(b",")
+        self._digest.update(value)
+        self._count += 1
+
+    def hexdigest(self) -> str:
+        digest = self._digest.copy()
+        digest.update(b"]")
+        return digest.hexdigest()
 
 
 class DomainStateEntry(ContractModel):
@@ -785,13 +815,6 @@ def _verify_lab_tree(
         raise LabError("lab contains missing or undeclared files or directories")
 
 
-def _receipt_references(evidence_ref: str, receipts: tuple[ReceiptEnvelope, ...]) -> bool:
-    return any(
-        evidence_ref == receipt.payload_hash or evidence_ref in receipt.object_refs
-        for receipt in receipts
-    )
-
-
 def _reject_private_reasoning(value: object, *, location: str = "payload") -> None:
     if isinstance(value, Mapping):
         for key, item in value.items():
@@ -806,7 +829,241 @@ def _reject_private_reasoning(value: object, *, location: str = "payload") -> No
             _reject_private_reasoning(item, location=f"{location}[{index}]")
 
 
+def _receipt_references(evidence_ref: str, receipts: tuple[ReceiptEnvelope, ...]) -> bool:
+    return any(
+        evidence_ref == receipt.payload_hash or evidence_ref in receipt.object_refs
+        for receipt in receipts
+    )
+
+
+def _ledger_file_identity(path: Path) -> tuple[int, int, str]:
+    try:
+        stat = path.stat()
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return stat.st_size, stat.st_mtime_ns, digest.hexdigest()
+    except OSError as error:
+        raise LabError(f"cannot identify the SQLite ledger: {error}") from error
+
+
+def _require_quiescent_ledger(path: Path) -> None:
+    transient_paths = tuple(Path(f"{path}{suffix}") for suffix in _SQLITE_TRANSIENT_SUFFIXES)
+    present = tuple(item for item in transient_paths if item.exists() or is_link_like(item))
+    if present:
+        names = ", ".join(item.name for item in present)
+        raise LabError(
+            "ledger snapshot requires a closed, checkpointed writer; "
+            f"found transient SQLite state: {names}"
+        )
+
+
+@contextmanager
+def _ledger_identity_index() -> Iterator[sqlite3.Connection]:
+    """Provide a fixed-cache temporary index for exact cross-row closure checks."""
+
+    connection = sqlite3.connect("")
+    try:
+        connection.execute("PRAGMA journal_mode = OFF")
+        connection.execute("PRAGMA synchronous = OFF")
+        connection.execute("PRAGMA temp_store = FILE")
+        connection.execute("PRAGMA cache_size = -2048")
+        connection.execute("PRAGMA mmap_size = 0")
+        connection.executescript(
+            """
+            CREATE TABLE objects (
+                payload_hash TEXT PRIMARY KEY
+            ) WITHOUT ROWID;
+            CREATE TABLE receipts (
+                receipt_id TEXT PRIMARY KEY,
+                occurrence_id TEXT NOT NULL UNIQUE,
+                receipt_hash TEXT NOT NULL UNIQUE
+            ) WITHOUT ROWID;
+            """
+        )
+        yield connection
+    finally:
+        connection.close()
+
+
+def _index_has(connection: sqlite3.Connection, table: str, column: str, value: str) -> bool:
+    if (table, column) not in {
+        ("objects", "payload_hash"),
+        ("receipts", "receipt_id"),
+    }:
+        raise AssertionError("internal ledger index query is not allow-listed")
+    row = connection.execute(f"SELECT 1 FROM {table} WHERE {column} = ?", (value,)).fetchone()
+    return row is not None
+
+
 def _ledger_snapshot(
+    path: Path, *, terminal_evidence_ref: str | None = None
+) -> _LedgerSnapshot:
+    """Validate and hash a complete ledger with memory bounded by one row."""
+
+    _require_quiescent_ledger(path)
+    identity_before = _ledger_file_identity(path)
+    source: sqlite3.Connection | None = None
+    try:
+        uri = f"{path.resolve(strict=True).as_uri()}?mode=ro&immutable=1"
+        source = sqlite3.connect(uri, uri=True)
+        source.execute("PRAGMA query_only = ON")
+        source.execute("PRAGMA temp_store = FILE")
+        source.execute("PRAGMA cache_size = -2048")
+        source.execute("PRAGMA mmap_size = 0")
+        source.execute("BEGIN")
+        with _ledger_identity_index() as index:
+            objects_projection = _CanonicalArrayHasher()
+            object_count = 0
+            previous_object: str | None = None
+            terminal_object_present = False
+            for stored_hash, stored_payload in source.execute(
+                "SELECT payload_hash, canonical_payload FROM objects ORDER BY payload_hash"
+            ):
+                raw = bytes(stored_payload)
+                payload = parse_strict_json(raw)
+                if canonical_bytes(payload) != raw:
+                    raise LabError("stored ledger object is not canonical JSON")
+                item = CapsuleObject(payload_hash=str(stored_hash), payload=payload)
+                if previous_object is not None and item.payload_hash <= previous_object:
+                    raise LabError("duplicate or unsorted object identity in SQLite ledger")
+                _reject_private_reasoning(item.payload)
+                try:
+                    index.execute(
+                        "INSERT INTO objects(payload_hash) VALUES (?)", (item.payload_hash,)
+                    )
+                except sqlite3.IntegrityError as error:
+                    raise LabError("duplicate object identity in SQLite ledger") from error
+                objects_projection.update(canonical_bytes(item))
+                object_count += 1
+                previous_object = item.payload_hash
+                terminal_object_present |= item.payload_hash == terminal_evidence_ref
+            index.commit()
+
+            receipts_projection = _CanonicalArrayHasher()
+            receipt_count = 0
+            previous_receipt: str | None = None
+            terminal_receipt_present = False
+            rows = source.execute(
+                """SELECT sequence, receipt_id, occurrence_id, kind,
+                          account_id, account_version, payload_hash,
+                          envelope_json, receipt_hash
+                   FROM receipts ORDER BY sequence"""
+            )
+            for row in rows:
+                (
+                    sequence,
+                    receipt_id,
+                    occurrence_id,
+                    kind,
+                    account_id,
+                    account_version,
+                    payload_hash,
+                    envelope_json,
+                    receipt_hash,
+                ) = row
+                raw = bytes(envelope_json)
+                envelope = ReceiptEnvelope.model_validate_json(raw)
+                if canonical_bytes(envelope) != raw:
+                    raise LabError("stored receipt envelope is not canonical JSON")
+                table_projection = (
+                    int(sequence),
+                    str(receipt_id),
+                    str(occurrence_id),
+                    str(kind),
+                    str(account_id),
+                    int(account_version),
+                    str(payload_hash),
+                    str(receipt_hash),
+                )
+                envelope_projection = (
+                    envelope.sequence,
+                    envelope.receipt_id,
+                    envelope.occurrence_id,
+                    envelope.kind,
+                    envelope.account_id,
+                    envelope.account_version,
+                    envelope.payload_hash,
+                    envelope.receipt_hash,
+                )
+                if table_projection != envelope_projection:
+                    raise LabError("receipt table projection disagrees with its envelope")
+                expected_id = content_hash(
+                    {
+                        "account_id": envelope.account_id,
+                        "account_version": envelope.account_version,
+                        "kind": envelope.kind,
+                        "object_refs": list(envelope.object_refs),
+                        "occurrence_id": envelope.occurrence_id,
+                        "parent_refs": list(envelope.parent_refs),
+                        "payload_hash": envelope.payload_hash,
+                    }
+                )
+                if envelope.receipt_id != expected_id:
+                    raise LabError("receipt identity disagrees with its content binding")
+                if envelope.sequence != receipt_count:
+                    raise LabError("receipt sequence is not contiguous")
+                if envelope.previous_receipt_hash != previous_receipt:
+                    raise LabError("receipt chain predecessor mismatch")
+                if not _index_has(index, "objects", "payload_hash", envelope.payload_hash):
+                    raise LabError("receipt payload object is missing")
+                if any(
+                    not _index_has(index, "objects", "payload_hash", reference)
+                    for reference in envelope.object_refs
+                ):
+                    raise LabError("receipt content reference is missing")
+                if any(
+                    not _index_has(index, "receipts", "receipt_id", reference)
+                    for reference in envelope.parent_refs
+                ):
+                    raise LabError("receipt parent reference is missing or forward")
+                try:
+                    index.execute(
+                        """INSERT INTO receipts(receipt_id, occurrence_id, receipt_hash)
+                           VALUES (?, ?, ?)""",
+                        (
+                            envelope.receipt_id,
+                            envelope.occurrence_id,
+                            envelope.receipt_hash,
+                        ),
+                    )
+                except sqlite3.IntegrityError as error:
+                    raise LabError("receipt violates SQLite identity uniqueness") from error
+                receipts_projection.update(raw)
+                receipt_count += 1
+                previous_receipt = envelope.receipt_hash
+                terminal_receipt_present |= terminal_evidence_ref is not None and (
+                    envelope.payload_hash == terminal_evidence_ref
+                    or terminal_evidence_ref in envelope.object_refs
+                )
+            index.commit()
+    except LabError:
+        raise
+    except (sqlite3.Error, TypeError, ValueError) as error:
+        raise LabError(f"invalid SQLite ledger content: {error}") from error
+    finally:
+        if source is not None:
+            source.close()
+
+    _require_quiescent_ledger(path)
+    if _ledger_file_identity(path) != identity_before:
+        raise LabError("SQLite ledger changed during its read-only snapshot")
+    seal = ExternalLedgerSeal(
+        receipt_count=receipt_count,
+        receipt_head=previous_receipt,
+        object_count=object_count,
+        objects_projection_ref=objects_projection.hexdigest(),
+        receipts_projection_ref=receipts_projection.hexdigest(),
+    )
+    return _LedgerSnapshot(
+        seal=seal,
+        terminal_object_present=terminal_object_present,
+        terminal_receipt_present=terminal_receipt_present,
+    )
+
+
+def _materialized_ledger_snapshot(
     path: Path,
 ) -> tuple[tuple[CapsuleObject, ...], tuple[ReceiptEnvelope, ...], ExternalLedgerSeal]:
     transient_paths = tuple(Path(f"{path}{suffix}") for suffix in ("-journal", "-shm", "-wal"))
@@ -1010,7 +1267,7 @@ def initialize_lab(
 
     with SQLiteLedger(ledger_path):
         pass
-    _, _, ledger_seal = _ledger_snapshot(ledger_path)
+    ledger_seal = _ledger_snapshot(ledger_path).seal
     domain_seal, _ = _domain_snapshot(domain_path)
     if (
         ledger_seal.receipt_count != 0
@@ -1036,12 +1293,21 @@ def verify_lab(root: str | Path, *, require_current_genesis: bool = False) -> La
     manifest, spec, genesis = _load_lab(resolved)
     ledger_path = _safe_existing(resolved, manifest.layout.ledger_path, file=True)
     domain_path = _safe_existing(resolved, manifest.layout.domain_state_path, file=False)
-    objects, receipts, ledger_seal = _ledger_snapshot(ledger_path)
-    domain_seal, _ = _domain_snapshot(domain_path)
-    domain_count = domain_seal.entry_count
     run_seal_path = resolved.joinpath(*PurePosixPath(manifest.layout.run_seal_path).parts)
     if is_link_like(run_seal_path):
         raise LabError("run seal must not be link-like")
+    run_seal: RunSeal | None = None
+    if run_seal_path.exists():
+        loaded_seal = _read_contract(run_seal_path, RunSeal)
+        assert isinstance(loaded_seal, RunSeal)
+        run_seal = loaded_seal
+    ledger_snapshot = _ledger_snapshot(
+        ledger_path,
+        terminal_evidence_ref=(None if run_seal is None else run_seal.terminal_evidence_ref),
+    )
+    ledger_seal = ledger_snapshot.seal
+    domain_seal, _ = _domain_snapshot(domain_path)
+    domain_count = domain_seal.entry_count
     _verify_lab_tree(
         resolved,
         manifest,
@@ -1058,9 +1324,7 @@ def verify_lab(root: str | Path, *, require_current_genesis: bool = False) -> La
         raise LabError("current lab state no longer matches its zero-state genesis")
 
     run_seal_ref: str | None = None
-    if run_seal_path.exists():
-        run_seal = _read_contract(run_seal_path, RunSeal)
-        assert isinstance(run_seal, RunSeal)
+    if run_seal is not None:
         if (
             run_seal.run_id != spec.run_id
             or run_seal.lab_manifest_ref != manifest.digest
@@ -1069,8 +1333,8 @@ def verify_lab(root: str | Path, *, require_current_genesis: bool = False) -> La
             or run_seal.ledger_seal != ledger_seal
             or run_seal.domain_state_seal != domain_seal
             or run_seal.terminal_authority_source != spec.terminal_authority_source
-            or run_seal.terminal_evidence_ref not in {item.payload_hash for item in objects}
-            or not _receipt_references(run_seal.terminal_evidence_ref, receipts)
+            or not ledger_snapshot.terminal_object_present
+            or not ledger_snapshot.terminal_receipt_present
         ):
             raise LabError("run seal disagrees with the current sealed lab state")
         if (
@@ -1111,9 +1375,11 @@ def seal_run(
     resolved = _resolved_root(root)
     verification = verify_lab(resolved)
     manifest, spec, genesis = _load_lab(resolved)
-    objects, receipts, ledger_seal = _ledger_snapshot(
-        _safe_existing(resolved, manifest.layout.ledger_path, file=True)
+    ledger_snapshot = _ledger_snapshot(
+        _safe_existing(resolved, manifest.layout.ledger_path, file=True),
+        terminal_evidence_ref=terminal_evidence_ref,
     )
+    ledger_seal = ledger_snapshot.seal
     domain_seal, _ = _domain_snapshot(
         _safe_existing(resolved, manifest.layout.domain_state_path, file=False)
     )
@@ -1124,10 +1390,9 @@ def seal_run(
         assert isinstance(existing, RunSeal)
     else:
         existing = None
-    object_refs = {item.payload_hash for item in objects}
-    if terminal_evidence_ref not in object_refs:
+    if not ledger_snapshot.terminal_object_present:
         raise LabError("terminal evidence must be a content object in the sealed ledger")
-    if not _receipt_references(terminal_evidence_ref, receipts):
+    if not ledger_snapshot.terminal_receipt_present:
         raise LabError("terminal evidence must be bound by a sealed ledger receipt")
     if completion_genuinely_observed and terminal_state != spec.success_state:
         raise LabError("observed completion must match the predeclared success state")
@@ -1193,7 +1458,7 @@ def pack_evidence(
         _safe_existing(resolved, manifest.layout.run_seal_path, file=True), RunSeal
     )
     assert isinstance(run_seal, RunSeal)
-    objects, receipts, ledger_seal = _ledger_snapshot(
+    objects, receipts, ledger_seal = _materialized_ledger_snapshot(
         _safe_existing(resolved, manifest.layout.ledger_path, file=True)
     )
     domain_seal, domain_payloads = _domain_snapshot(

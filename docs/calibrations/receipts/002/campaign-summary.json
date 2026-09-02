@@ -1,0 +1,146 @@
+{
+  "schema": "strongwiz.arc-agi3-calibration-campaign-summary.v1",
+  "calibration_id": "002",
+  "campaign_id": "calibration-002-strongwiz-v2-adaptive-kevin-speak",
+  "toolbelt": {
+    "commit": "1e6c2478cbb4f4168d8ec8857b65b88af1fd499a",
+    "tree": "83172b2de0712af0e591486ff3e6d0550cea5691",
+    "version": "0.3.0.dev0"
+  },
+  "evaluation": {
+    "game_id": "ls20-9607627b",
+    "seed": 0,
+    "claim_class": "local-public-codex-operated-strongwiz-calibration"
+  },
+  "result": {
+    "completion_genuinely_observed": false,
+    "disposition": "partial",
+    "final_campaign_decision": "reassess",
+    "final_state": "NOT_FINISHED",
+    "levels_completed": 1,
+    "win_levels": 7,
+    "stop_reason": "owner_requested_resource_pause"
+  },
+  "aggregate_budget": {
+    "maximum_non_reset_actions": 2048,
+    "maximum_resets": 64,
+    "maximum_total_environment_calls": 2112,
+    "wall_clock_ms": 28800000
+  },
+  "aggregate_observed": {
+    "elapsed_wall_ms": 10751405,
+    "non_reset_actions": 699,
+    "resets": 12,
+    "total_environment_calls": 711
+  },
+  "stages": [
+    {
+      "ordinal": 0,
+      "run_id": "calibration-002-stage-1",
+      "final_state": "NOT_FINISHED",
+      "levels_completed": 1,
+      "win_levels": 7,
+      "non_reset_actions": 118,
+      "resets": 2,
+      "total_environment_calls": 120,
+      "elapsed_wall_ms": 1699453,
+      "terminal_record_ref": "712814051cc622db18f9e03b5ef3c646baba6208310e8497f94662b8d7424fbe",
+      "run_seal_ref": "f45f7dd2c01af0646503676ee24163d715f5d3f1b24fe216e966b427312d1a5a",
+      "capsule_ref": "87a25cabc32207817681cd58d594f864fbe4445a4bdad3ddad1e509441edcdc0",
+      "delivery_receipt_sha256": "1295f531998f523a5b88bc3631bcbf99b8346481a0f6789936281cba75dc6ca8"
+    },
+    {
+      "ordinal": 1,
+      "run_id": "calibration-002-stage-2",
+      "final_state": "NOT_FINISHED",
+      "levels_completed": 1,
+      "win_levels": 7,
+      "non_reset_actions": 122,
+      "resets": 1,
+      "total_environment_calls": 123,
+      "elapsed_wall_ms": 3256265,
+      "terminal_record_ref": "f40b2805ccc16f0f981592a8d94ef273c9f4121ede75f380d39a375315b601de",
+      "run_seal_ref": "277db6c48bcdb0f4e2116246bdfb72453f23213760b0b8398a074a18596f2323",
+      "capsule_ref": "0b1993058e4fbefe492d5271fe302268101d3cc13c9e41114faffed12c9fa9d0",
+      "delivery_receipt_sha256": "fd05332bef11ee7a04a231444e902c1a6209a7737321061642b822033203f5a2"
+    },
+    {
+      "ordinal": 2,
+      "run_id": "calibration-002-stage-3",
+      "final_state": "NOT_FINISHED",
+      "levels_completed": 1,
+      "win_levels": 7,
+      "non_reset_actions": 384,
+      "resets": 7,
+      "total_environment_calls": 391,
+      "elapsed_wall_ms": 4462329,
+      "incidents": ["KNOWN_NO_EFFECT:BudgetExceeded"],
+      "terminal_record_ref": "de767815125b2d20fdd072821c94d90f78102cae6156cea780ef8759a7ac6f86",
+      "run_seal_ref": "ca9e11a37111971bc8a7c145e2b80f463a1858ecc204a10c8efe505927832f22",
+      "capsule_ref": "f019ad03a1cf49ea6dad825aa01b4788a5c35e1179339299955e8842eaaa2c90",
+      "delivery_receipt_sha256": "1a0e9783df61ccb17dfb5e860a9674ea8c5342201eaeba9d0f2269d66ecd9aa3"
+    },
+    {
+      "ordinal": 3,
+      "run_id": "calibration-002-stage-4",
+      "final_state": "NOT_FINISHED",
+      "levels_completed": 1,
+      "win_levels": 7,
+      "non_reset_actions": 75,
+      "resets": 2,
+      "total_environment_calls": 77,
+      "elapsed_wall_ms": 1333358,
+      "stop_reason": "owner_requested_resource_pause",
+      "terminal_record_ref": "456c6d01c1867fe97c53c95d378641dc82c9256de0f15425ec6a8ecb84b99d7a",
+      "run_seal_ref": "8b70bce8b61a532a2fba0087e8c8edf92e68bbbbfe8ea0d01fab751420625142",
+      "capsule_ref": "3473cce40f4093bfb4383de496dbe063f71dd40699dcb47800494614fa73c16d",
+      "delivery_receipt_sha256": "16dde5fbc12304c8ad6673cae40934e527f5b0dbfd6fa52aef6712c1fa100f78"
+    }
+  ],
+  "kevin_speak": {
+    "active_codebook_ref": "08fc1422b7a86a2e126681202a3394aa819daa171724bd22c0351ea0a2b90932",
+    "codebook_version": 0,
+    "entries": 10,
+    "residual_entries": 10,
+    "compact_entries": 0,
+    "evaluations": 0,
+    "adaptation_attempts": 0,
+    "promoted_symbols": 0,
+    "source_bytes": 4234,
+    "representation_bytes": 4234,
+    "all_exact_round_trips": true,
+    "campaign_ref": "bb96addfde48847b083a52d36f2a6abd22189232af03c10a59fbffbf81647f6a",
+    "final_checkpoint_ref": "3fbee5cd92812fbb77ba5d1bba37b197ede6ab5ecc179af460edaf4ef4ade8c1",
+    "learning_ledger_receipt_count": 37,
+    "learning_ledger_receipt_head": "a253b24742f4b39f3e15c01000ad9810c949a1948f3e28f737f708d07ec8424e"
+  },
+  "transitions": [
+    {
+      "transition_id": "calibration-002-stage-1-to-2",
+      "manifest_ref": "df2ec2dddd0ce2383ce08c799ac4a089914e0fc1655a8d9ce8faa251a6531038",
+      "verified": true
+    },
+    {
+      "transition_id": "calibration-002-stage-2-to-3",
+      "manifest_ref": "246e5aa6ec40f6104546d51e8c9ec43f58b349cc0017d3fe2647eb824e63431d",
+      "verified": true
+    },
+    {
+      "transition_id": "calibration-002-stage-3-to-4",
+      "manifest_ref": "66de57d5ea94847804f7ef39ae919ec8a835ca394d04ae452809c4b0deeaa276",
+      "verified": true
+    }
+  ],
+  "final_handoff": {
+    "handoff_ref": "97bc8535e29c355cd66d3458134d2533661c02067149cb783d6ce285632b0991",
+    "selected_recommendation_ref": "a053a8ddc7dce707c9d4a8f906691e7b1703d35a968cf00d0e4d0e19a016210f",
+    "next_decision": "reassess"
+  },
+  "claim_exclusions": [
+    "not a competition entry or Kaggle result",
+    "not a private or official evaluation score",
+    "not an autonomous-offline or generalization claim",
+    "does not establish a causal Kevin Speak effect",
+    "does not establish AGI, consciousness, PAL, or a general theory"
+  ]
+}

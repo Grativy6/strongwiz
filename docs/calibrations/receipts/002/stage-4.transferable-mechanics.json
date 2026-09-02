@@ -1,0 +1,38 @@
+{
+  "schema": "strongwiz.calibration-002-stage4-transferable-mechanics.v1",
+  "game_id": "ls20-9607627b",
+  "claim_ceiling": "run-local official public observations only",
+  "excluded_material": [
+    "frames",
+    "raw_traces",
+    "action_sequences",
+    "domain_state",
+    "private_reasoning"
+  ],
+  "mechanics": [
+    {
+      "mechanic_id": "stage4-cardinal-five-pixel-displacement",
+      "statement": "Legal cardinal inputs repeatedly displaced the controlled five-by-five block by five pixels along aligned corridors.",
+      "support": "repeated run-local observation",
+      "reopening_condition": "Any later legal input with a conflicting displacement or footprint consequence"
+    },
+    {
+      "mechanic_id": "stage4-level1-intervening-white",
+      "statement": "A first-level blue-socket rejection followed by an intervening white contact and blue-socket recontact produced the official level transition.",
+      "support": "one run-local official transition",
+      "reopening_condition": "A disjoint run showing that the intervening white contact is unnecessary or that the same relation fails"
+    },
+    {
+      "mechanic_id": "stage4-yellow-refill-confirmed",
+      "statement": "Each contacted second-level yellow ring disappeared and restored the visible action bar to full.",
+      "support": "two distinct run-local yellow contacts",
+      "reopening_condition": "A later yellow contact that does not disappear or replenish"
+    },
+    {
+      "mechanic_id": "stage4-level2-order-residual",
+      "statement": "The lower-yellow, white, upper-yellow contact history was rejected at the second-level blue socket and did not transition the level.",
+      "support": "one run-local official socket outcome",
+      "reopening_condition": "Only an official transition isolating a compatible accepted history"
+    }
+  ]
+}

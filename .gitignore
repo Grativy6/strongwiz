@@ -3,6 +3,8 @@
 .pytest-tmp/
 .mypy_cache/
 .ruff_cache/
+.cache/
+.tmp/
 __pycache__/
 *.py[cod]
 *.egg-info/

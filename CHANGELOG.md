@@ -6,6 +6,27 @@ All notable changes to Strongwiz will be recorded here. Dates use ISO 8601.
 
 Publication remains pending an explicitly authorized tag and release.
 
+### Added
+
+- Experimental Kevin Speak working ledgers with blank genesis, a fixed
+  nonexecuting decoder, recursive immutable codebooks, exact reconstruction,
+  an uncompressed residual lane, and charged adaptation/validation gates.
+- A sealed successor boundary separating source-agent recommendation,
+  post-seal bundling, optional stronger-model review/refinement, scoped control
+  adoption, and explicit transfer.
+- Reference-normalized `strongwiz.session-checkpoint.v2` durable checkpoints;
+  v1 remains readable for historical evidence.
+- Row-streaming ledger verification and seal snapshots with a disk-backed
+  identity/closure index, preserving the existing projection hashes without
+  retaining the full ledger in memory.
+- Event-driven steering heartbeats and a bounded 30/60/90/final adaptive
+  campaign controller.
+
+### Changed
+
+- Development package version advanced to `0.3.0.dev0`; the public contract
+  remains `strongwiz.contract.v1`.
+
 ## [0.2.0] - release candidate
 
 ### Added

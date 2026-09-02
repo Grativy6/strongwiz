@@ -115,20 +115,10 @@ def _git(repository_root: Path, *arguments: str) -> str:
     return result.stdout.strip()
 
 
-def _baseline_checkout_bytes(repository_root: Path, commit: str, relative_path: str) -> bytes:
-    result = subprocess.run(
-        [
-            "git",
-            "cat-file",
-            "--filters",
-            f"--path={relative_path}",
-            f"{commit}:{relative_path}",
-        ],
-        cwd=repository_root,
-        check=True,
-        capture_output=True,
-    )
-    return result.stdout
+def _working_tree_blob_id(repository_root: Path, relative_path: str) -> str:
+    """Hash working content through Git's declared clean filters."""
+
+    return _git(repository_root, "hash-object", f"--path={relative_path}", relative_path)
 
 
 def _verify_baseline(repository_root: Path, *, commit: str, tree: str) -> None:
@@ -178,24 +168,35 @@ def _verify_baseline(repository_root: Path, *, commit: str, tree: str) -> None:
         raise CalibrationError("pinned kernel path set differs from the baseline commit")
     for relative in baseline_paths:
         working_path = repository_root / relative
+        expected_blob = _git(repository_root, "rev-parse", f"{commit}:{relative}")
         if (
             not working_path.is_file()
             or working_path.is_symlink()
-            or working_path.read_bytes()
-            != _baseline_checkout_bytes(repository_root, commit, relative)
+            or (_working_tree_blob_id(repository_root, relative) != expected_blob)
         ):
             raise CalibrationError(
-                f"pinned kernel working-tree bytes differ from baseline: {relative}"
+                "pinned kernel working-tree bytes differ from baseline after Git clean "
+                f"filtering: {relative}"
             )
 
 
-def _source_paths(repository_root: Path) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
+def _source_paths(
+    repository_root: Path,
+    *,
+    integration_packages: tuple[str, ...] = ("calibration",),
+) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
     kernel = tuple(sorted((repository_root / "src/strongwiz").rglob("*.py")))
     py_typed = repository_root / "src/strongwiz/py.typed"
     if py_typed.exists():
         kernel = (*kernel, py_typed)
-    integration = tuple(sorted((repository_root / "calibration").glob("*.py")))
-    integration = (*integration, *sorted((repository_root / "calibration").glob("*.json")))
+    integration = tuple(
+        sorted(
+            path
+            for package in integration_packages
+            for pattern in ("*.py", "*.json")
+            for path in (repository_root / package).glob(pattern)
+        )
+    )
     if not kernel or not integration:
         raise CalibrationError("toolbelt or integration source set is empty")
     return kernel, integration
@@ -246,6 +247,13 @@ def prepare_run(
     run_root: Path,
     assets_root: Path,
     run_id: str,
+    preregistration_relative: Path = PREREGISTRATION_RELATIVE,
+    package_version: str = "0.2.0",
+    task_id: str = "calibration-001-official-public-ls20",
+    lab_id: str = "strongwiz-arc3-calibration-001",
+    lab_version: str = "1",
+    lab_purpose: str = "One clean-room Codex-operated local-public ARC-AGI-3 calibration.",
+    integration_packages: tuple[str, ...] = ("calibration",),
 ) -> PreparedRunBundle:
     """Freeze inputs, prove empty genesis, then write run controls—never make a game."""
 
@@ -257,18 +265,25 @@ def prepare_run(
         except ValueError as error:
             raise CalibrationError(f"{label} must remain inside the repository") from error
     verify_dependency_versions()
-    prereg = load_preregistration(root, root / PREREGISTRATION_RELATIVE)
+    prereg = load_preregistration(root, root / preregistration_relative)
     asset_path = assets_root.resolve(strict=True) / ASSET_MANIFEST_NAME
     asset = load_asset_manifest(assets_root, asset_path)
     if asset.exact_game_id == prereg.preregistration.evaluation.game_name:
         raise CalibrationError("asset identity is not versioned")
+    expected_game_id = prereg.preregistration.evaluation.exact_versioned_game_id
+    if expected_game_id is not None and asset.exact_game_id != expected_game_id:
+        raise CalibrationError(
+            "official asset version differs from the preregistered comparison target"
+        )
     _verify_baseline(
         root,
         commit=prereg.preregistration.toolbelt.commit,
         tree=prereg.preregistration.toolbelt.tree,
     )
 
-    kernel_paths, integration_paths = _source_paths(root)
+    kernel_paths, integration_paths = _source_paths(
+        root, integration_packages=integration_packages
+    )
     kernel_files = freeze_files(root, kernel_paths)
     integration_files = freeze_files(root, integration_paths)
     all_files = tuple(
@@ -300,7 +315,7 @@ def prepare_run(
     grant = TaskGrant(
         root_ref=prereg.file_sha256,
         source=GrantSource.HUMAN,
-        task_id="calibration-001-official-public-ls20",
+        task_id=task_id,
         goal_id=goal.goal_id,
         goal_ref=goal.digest,
         scope_id=scope_id,
@@ -319,7 +334,7 @@ def prepare_run(
     )
     policies = tuple(sorted((router.digest, cadence.digest)))
     frozen = FrozenRuntimeManifest(
-        package_version="0.2.0",
+        package_version=package_version,
         contract_schema=CONTRACT_SCHEMA,
         source_files=all_files,
         configuration_ref=prereg.file_sha256,
@@ -333,7 +348,8 @@ def prepare_run(
         capability_refs=(),
         policy_refs=policies,
         runtime_description=(
-            "Strongwiz v0.2 run-local ARC-AGI-3 adapter with an externally supplied "
+            f"Strongwiz {package_version} run-local ARC-AGI-3 adapter with an "
+            "externally supplied "
             "memoized ProposalDraft and a single official-environment writer"
         ),
     )
@@ -349,10 +365,10 @@ def prepare_run(
         )
     )
     lab_manifest = LabManifest(
-        lab_id="strongwiz-arc3-calibration-001",
-        lab_version="1",
-        purpose="One clean-room Codex-operated local-public ARC-AGI-3 calibration.",
-        strongwiz_version="0.2.0",
+        lab_id=lab_id,
+        lab_version=lab_version,
+        purpose=lab_purpose,
+        strongwiz_version=package_version,
         kernel_artifact_ref=toolbelt_ref,
         contract_schema=CONTRACT_SCHEMA,
         policy_refs=policies,

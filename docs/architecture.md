@@ -89,6 +89,10 @@ The remaining modules are replaceable reasoning services:
   and domain adapters;
 - `lab` supplies zero-state genesis, predeclared runs, immutable terminal
   seals, complete evidence capsules, and non-adopting promotion receipts;
+- `shorthand` supplies the experimental Kevin Speak representation ledger,
+  exact residual fallback, and sealed successor recommendation/adoption path;
+- `curriculum` supplies sequential bounded campaigns with explicit learned-state
+  transfers, while `heartbeat` supplies event-driven steering projections;
 - `features` keeps experimental capabilities replaceable and inert by default;
 - `provenance` validates the exact paper and policy source registry.
 
@@ -121,7 +125,7 @@ unreceipted scan or decision. Assessment additionally requires the matching
 completed release, execution-attempt receipt, executor evidence, and the exact
 decision route/control pair.
 
-`SessionCheckpoint` extends the concise `SessionReceipt` with exactly the
+`SessionCheckpoint` v1 extends the concise `SessionReceipt` with exactly the
 active request, pending proposal, repeated-failure guard, account/version, and
 history needed to restart any phase. Restoration revalidates the frozen
 runtime, driver, domain, policies, account, exact latest ledger boundary, and
@@ -131,6 +135,20 @@ schema; consumers needing `strongwiz.session-receipt.v1` must use the explicit
 `concise_receipt()` projection. A checkpoint with any durable receipt lineage
 can only be restored with its original ledger; only a genuinely ledgerless
 checkpoint may be transported without one.
+
+New durable writes use `strongwiz.session-checkpoint.v2`. V2 stores typed
+history counts, the exact predecessor receipt, and only current actionable
+objects by reference. Restore reconstructs the full v1-compatible in-memory
+state from the verified original ledger. This removes repeated growing history
+arrays from checkpoint payloads without weakening restart identity. Historical
+v1 checkpoints remain readable.
+
+Lab verification and run sealing now validate ledger rows incrementally and use
+a disk-backed identity index for uniqueness and reference closure. Their
+canonical-array projection hashes remain byte-identical to the v1 contract, and
+memory grows with the largest row rather than total row count. Evidence-capsule
+packing still uses the audited materialized exporter; a streaming packer has not
+yet been promoted into the kernel.
 
 The reusable Strongwiz source/runtime and an experiment lab are separate
 objects. A lab begins with a recorded empty ledger and no domain state. A later

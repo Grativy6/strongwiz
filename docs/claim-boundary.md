@@ -22,13 +22,26 @@ domain's terminal authority. A domain adapter, executor, model artifact,
 configuration, and external control plane are still required for an
 operational system.
 
-Version 0.2 can create an empty lab, restore all session phases, seal a terminal
-run, and export every referenced ledger object and receipt. Those mechanisms
+Version 0.3 development code can create an empty lab, restore all session
+phases, seal a terminal run, and export every referenced ledger object and
+receipt. Those mechanisms
 establish integrity and restart behavior on their tested surfaces. They do not
 prove that an upstream observation was honest, a source file was safe, an
 executor achieved exactly-once effects, or a success generalizes to another
 run. A `PromotionReceipt` is explicitly a proposal for later review and
 ablation, not adoption or inherited domain knowledge.
+
+Kevin Speak exact reconstruction proves only a representation round trip on
+the declared bytes. It does not prove semantic understanding, unchanged model
+behavior, improved reasoning, or reduced total campaign cost. A source model's
+recommendation and a reviewer model's refinement remain advisory; only a
+separate scoped adoption decision can admit an exact codebook to one successor
+stage, and that decision transfers no action authority.
+
+The streaming ledger snapshot bounds verification and sealing memory by a row
+plus a fixed-cache disk index on the tested surface. It does not yet make
+evidence-capsule packing or capsule verification streaming, nor does it bound an
+individual ledger row's size.
 
 Evidence capsules copy sealed domain-state bytes opaquely. Strongwiz does not
 perform privacy, credential, secret, personal-data, or redistribution review
